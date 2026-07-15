@@ -1,0 +1,3890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>代码高亮工坊</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&family=Press+Start+2P&family=Bungee+Shade&family=Nabla&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<style>
+  /* ============ 设计令牌 ============ */
+  :root {
+    --bg-0: #040406;
+    --bg-1: #09090c;
+    --bg-2: #0e0e13;
+
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-bg-strong: rgba(255, 255, 255, 0.055);
+    --glass-border: rgba(255, 255, 255, 0.07);
+    --glass-border-strong: rgba(255, 255, 255, 0.13);
+    --glass-highlight: rgba(255, 255, 255, 0.05);
+    --glass-inner-glow: rgba(255, 255, 255, 0.02);
+
+    --text-1: #f0f0f2;
+    --text-2: #9a9aa2;
+    --text-3: #62626a;
+    --text-4: #3c3c44;
+
+    --accent: #6ea8ff;
+    --accent-soft: rgba(110, 168, 255, 0.15);
+    --accent-glow: rgba(110, 168, 255, 0.30);
+
+    --cyan: #5ee0d0;
+    --violet: #a78bfa;
+    --pink: #f472b6;
+
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 10px;
+
+    --shadow-deep: 0 40px 100px -20px rgba(0, 0, 0, 0.85), 0 16px 40px -12px rgba(0, 0, 0, 0.65), 0 4px 12px -4px rgba(0, 0, 0, 0.5);
+    --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.07), inset 0 -1px 0 rgba(0, 0, 0, 0.45), inset 1px 0 0 rgba(255, 255, 255, 0.03), inset -1px 0 0 rgba(255, 255, 255, 0.03);
+    --shadow-float: 0 8px 32px -8px rgba(0, 0, 0, 0.6), 0 2px 8px -2px rgba(0, 0, 0, 0.4);
+
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg-0);
+    color: var(--text-1);
+    font-weight: 300;
+    letter-spacing: 0.01em;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ============ 液态光晕背景（多层流动） ============ */
+  .aurora {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* 第一层：主光斑群 - 缓慢漂移 */
+  .aurora::before {
+    content: "";
+    position: absolute;
+    inset: -20%;
+    background:
+      radial-gradient(40% 50% at 18% 20%, rgba(110, 168, 255, 0.22), transparent 60%),
+      radial-gradient(35% 45% at 82% 28%, rgba(167, 139, 250, 0.18), transparent 60%),
+      radial-gradient(45% 55% at 70% 85%, rgba(94, 224, 208, 0.14), transparent 60%),
+      radial-gradient(30% 40% at 25% 80%, rgba(244, 114, 182, 0.10), transparent 60%);
+    filter: blur(30px);
+    animation: aurora-drift 28s ease-in-out infinite alternate;
+  }
+
+  /* 第二层：副光斑 - 反向流动，增加深度 */
+  .aurora .layer-2 {
+    position: absolute;
+    inset: -20%;
+    background:
+      radial-gradient(30% 35% at 65% 15%, rgba(99, 102, 241, 0.16), transparent 65%),
+      radial-gradient(40% 50% at 15% 60%, rgba(45, 212, 191, 0.12), transparent 65%),
+      radial-gradient(35% 40% at 90% 70%, rgba(236, 72, 153, 0.10), transparent 65%);
+    filter: blur(40px);
+    animation: aurora-drift-rev 36s ease-in-out infinite alternate;
+    opacity: 0.8;
+  }
+
+  /* 第三层：细微光点闪烁，模拟粒子 */
+  .aurora .layer-3 {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1.5px 1.5px at 20% 30%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 80% 20%, rgba(167,197,255,0.7), transparent),
+      radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1.5px 1.5px at 90% 50%, rgba(186,230,253,0.6), transparent),
+      radial-gradient(1px 1px at 10% 90%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 50% 10%, rgba(244,200,255,0.6), transparent),
+      radial-gradient(1px 1px at 75% 85%, rgba(255,255,255,0.4), transparent);
+    background-size: 100% 100%;
+    animation: twinkle 8s ease-in-out infinite;
+  }
+
+  /* 暗角 + 噪点纹理 */
+  .aurora::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(60% 60% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.4'/></svg>");
+    background-blend-mode: normal, overlay;
+    opacity: 0.35;
+    mix-blend-mode: overlay;
+  }
+
+  @keyframes aurora-drift {
+    0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
+    50%  { transform: translate(2%, -3%) rotate(2deg) scale(1.05); }
+    100% { transform: translate(-2%, 2%) rotate(-2deg) scale(1.02); }
+  }
+  @keyframes aurora-drift-rev {
+    0%   { transform: translate(0, 0) rotate(0deg) scale(1.05); }
+    50%  { transform: translate(-3%, 2%) rotate(-3deg) scale(1); }
+    100% { transform: translate(2%, -2%) rotate(2deg) scale(1.03); }
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.4; }
+    50%      { opacity: 0.9; }
+  }
+
+  /* ============ 主容器 ============ */
+  .app {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 18px;
+    padding: 22px 26px 22px;
+  }
+
+  /* ============ 顶部 ============ */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 22px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(48px) saturate(200%);
+    -webkit-backdrop-filter: blur(48px) saturate(200%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-glass), var(--shadow-deep);
+    position: relative;
+    z-index: 30;
+    overflow: hidden;
+  }
+
+  /* topbar 顶部高光线 - 缓慢流动（用 overflow 裁切在 border-radius 内） */
+  .topbar::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(110, 168, 255, 0.35) 30%,
+      rgba(244, 200, 255, 0.45) 50%,
+      rgba(94, 224, 208, 0.35) 70%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: topbar-sheen 10s linear infinite;
+    pointer-events: none;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    z-index: 2;
+  }
+
+  @keyframes topbar-sheen {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .brand {
+    padding-left: 8px;
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .avatar-frame {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    border-radius: 10px;
+    padding: 3px;
+    background: conic-gradient(
+      from 0deg,
+      #6ea8ff, #a78bfa, #5ee0d0, #f472b6, #6ea8ff
+    );
+    animation: avatar-spin 4s linear infinite, avatar-float 3s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 12px rgba(110, 168, 255, 0.4)) drop-shadow(0 0 30px rgba(167, 139, 250, 0.15));
+    flex-shrink: 0;
+    transition: transform 0.4s var(--ease-out-expo), filter 0.4s ease;
+  }
+
+  .avatar-frame:hover {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 16px rgba(110, 168, 255, 0.55)) drop-shadow(0 0 40px rgba(167, 139, 250, 0.2));
+  }
+
+  .avatar-frame::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: inherit;
+    filter: blur(8px);
+    opacity: 0.6;
+    z-index: -1;
+    animation: avatar-spin 4s linear infinite;
+  }
+
+  .brand-avatar {
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    border-radius: 7px;
+    display: block;
+    background: var(--bg-1);
+    animation: avatar-hue 6s linear infinite;
+  }
+
+  @keyframes avatar-spin {
+    to { rotate: 360deg; }
+  }
+
+  @keyframes avatar-float {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(-4px); }
+  }
+
+  @keyframes avatar-hue {
+    to { filter: hue-rotate(360deg); }
+  }
+
+  .brand-title {
+    font-family: 'Nabla', cursive;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    position: relative;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 14px;
+    background: linear-gradient(
+      90deg,
+      #6ea8ff, #a78bfa, #5ee0d0, #f472b6, #6ea8ff
+    );
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: brand-gradient 6s linear infinite;
+    filter: drop-shadow(0 0 12px rgba(110, 168, 255, 0.5));
+  }
+
+  .brand-title .word-sm {
+    font-size: 28px;
+  }
+
+  .brand-title .word-lg {
+    font-size: 44px;
+  }
+
+  .brand-title::before,
+  .brand-title::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-family: 'Nabla', cursive;
+    font-size: 36px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    background: inherit;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 300% 100%;
+    animation: brand-gradient 6s linear infinite;
+  }
+
+  .brand-title::before {
+    animation: brand-gradient 6s linear infinite, brand-glitch-r 4s ease-in-out infinite;
+  }
+
+  .brand-title::after {
+    animation: brand-gradient 6s linear infinite, brand-glitch-b 4s ease-in-out infinite;
+  }
+
+  @keyframes brand-gradient {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+
+  @keyframes brand-glitch-r {
+    0%, 88%, 92%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); opacity: 0; }
+    89% { clip-path: inset(20% 0 40% 0); transform: translate(-3px, -1px); opacity: 0.7; }
+    91% { clip-path: inset(60% 0 10% 0); transform: translate(2px, 1px); opacity: 0.7; }
+  }
+
+  @keyframes brand-glitch-b {
+    0%, 88%, 92%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); opacity: 0; }
+    89% { clip-path: inset(50% 0 20% 0); transform: translate(3px, 1px); opacity: 0.7; }
+    91% { clip-path: inset(10% 0 60% 0); transform: translate(-2px, -1px); opacity: 0.7; }
+  }
+
+  .topbar-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    margin-left: auto;
+  }
+
+  /* 主题切换器 */
+  .theme-switcher {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 3px;
+    padding: 6px;
+    width: fit-content;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+  }
+
+  .theme-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 9px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--text-3);
+    font-family: 'Sora', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+    position: relative;
+    width: 100%;
+  }
+
+  .theme-chip:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.3);
+  }
+
+  .theme-chip.active {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: var(--glass-border-strong);
+    color: var(--text-1);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 2px 12px -4px rgba(0, 0, 0, 0.4);
+  }
+
+  .theme-chip.active .swatch {
+    transform: scale(1.15);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 2px 8px rgba(0, 0, 0, 0.5),
+      0 0 10px rgba(255, 255, 255, 0.1);
+  }
+
+  .theme-chip .swatch {
+    width: 13px;
+    height: 13px;
+    border-radius: 4px;
+    display: inline-block;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      0 1px 4px rgba(0, 0, 0, 0.4);
+    flex-shrink: 0;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .theme-chip .chip-label {
+    letter-spacing: 0.01em;
+  }
+
+  /* 语言选择器 */
+  .lang-select {
+    position: relative;
+    min-width: 220px;
+  }
+
+  .lang-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    color: var(--text-1);
+    font-family: 'Sora', sans-serif;
+    font-size: 13.5px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out-expo);
+  }
+
+  .lang-trigger:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: var(--glass-border-strong);
+    box-shadow: 0 2px 12px -4px rgba(0, 0, 0, 0.3);
+  }
+
+  .lang-trigger .lang-current {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .lang-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+    animation: dot-breathe 3s ease-in-out infinite;
+  }
+
+  @keyframes dot-breathe {
+    0%, 100% { box-shadow: 0 0 8px var(--accent-glow); opacity: 1; }
+    50%      { box-shadow: 0 0 16px var(--accent-glow); opacity: 0.7; }
+  }
+
+  .lang-trigger .chev {
+    transition: transform 0.25s ease;
+    color: var(--text-3);
+  }
+
+  .lang-select.open .chev { transform: rotate(180deg); }
+
+
+  .lang-menu {
+    position: fixed;
+    max-height: 320px;
+    overflow-y: auto;
+    background: rgba(12, 12, 16, 0.88);
+    backdrop-filter: blur(48px) saturate(200%);
+    -webkit-backdrop-filter: blur(48px) saturate(200%);
+    border: 1px solid var(--glass-border-strong);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-deep), 0 0 40px -10px rgba(110, 168, 255, 0.06);
+    padding: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px) scale(0.96);
+    transition: opacity 0.25s var(--ease-out-expo), transform 0.25s var(--ease-out-expo);
+    z-index: 200;
+    min-width: 200px;
+  }
+
+  .lang-menu.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+
+  .lang-option {
+    padding: 9px 12px;
+    border-radius: 7px;
+    font-size: 13px;
+    color: var(--text-2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.15s ease;
+  }
+
+  .lang-option:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-1);
+  }
+
+  .lang-option.active {
+    background: var(--accent-soft);
+    color: var(--text-1);
+  }
+
+  .lang-option .ext {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-4);
+  }
+
+  .lang-menu::-webkit-scrollbar { width: 6px; }
+  .lang-menu::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+  }
+
+  /* ============ 主工作区 ============ */
+  .workspace {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    min-height: 0;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* 两面板之间的玻璃分割线 */
+  .workspace::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      transparent 5%,
+      rgba(255, 255, 255, 0.06) 30%,
+      rgba(167, 197, 255, 0.10) 50%,
+      rgba(255, 255, 255, 0.06) 70%,
+      transparent 95%
+    );
+    z-index: 20;
+    pointer-events: none;
+    transform: translateX(-50%);
+  }
+
+  /* ============ 玻璃面板（带流光动画 + 鼠标追踪光效） ============ */
+  .panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(48px) saturate(200%);
+    -webkit-backdrop-filter: blur(48px) saturate(200%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-glass), var(--shadow-deep);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    isolation: isolate;
+    transition: box-shadow 0.6s var(--ease-out-expo), border-color 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo);
+  }
+
+  /* 顶部高光线 — 更细腻的彩虹渐变 */
+  .panel::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+      transparent 5%,
+      rgba(255,255,255,0.12) 25%,
+      rgba(167, 197, 255, 0.22) 50%,
+      rgba(255,255,255,0.12) 75%,
+      transparent 95%
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* 边缘流光扫过 - 液态玻璃质感核心 */
+  .panel::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      120deg,
+      transparent 25%,
+      rgba(110, 168, 255, 0.0) 38%,
+      rgba(167, 197, 255, 0.55) 50%,
+      rgba(244, 200, 255, 0.0) 62%,
+      transparent 75%
+    );
+    background-size: 300% 100%;
+    background-position: 200% 0;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-out-expo);
+    animation: sheen-flow 6s linear infinite;
+  }
+
+  .panel:hover::after {
+    opacity: 1;
+  }
+
+  .panel:hover {
+    border-color: var(--glass-border-strong);
+    box-shadow:
+      var(--shadow-glass),
+      var(--shadow-deep),
+      0 0 80px -15px rgba(110, 168, 255, 0.12),
+      0 0 120px -30px rgba(167, 139, 250, 0.06);
+    transform: translateY(-1px);
+  }
+
+  /* 鼠标追踪光效层 — JS 动态更新 --mx, --my */
+  .panel .spotlight,
+  .topbar .spotlight,
+  .actionbar .spotlight {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    background: radial-gradient(
+      350px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(255, 255, 255, 0.045) 0%,
+      transparent 60%
+    );
+  }
+  .panel:hover .spotlight,
+  .topbar:hover .spotlight,
+  .actionbar:hover .spotlight {
+    opacity: 1;
+  }
+
+  @keyframes sheen-flow {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -100% 0; }
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.25);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .panel-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-2);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .panel-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .panel-dots span {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .panel-dots span:nth-child(1) { background: rgba(255, 95, 87, 0.55); box-shadow: 0 0 6px rgba(255, 95, 87, 0.25); }
+  .panel-dots span:nth-child(2) { background: rgba(254, 188, 46, 0.55); box-shadow: 0 0 6px rgba(254, 188, 46, 0.25); }
+  .panel-dots span:nth-child(3) { background: rgba(40, 200, 64, 0.55); box-shadow: 0 0 6px rgba(40, 200, 64, 0.25); }
+
+  .panel-header:hover .panel-dots span:nth-child(1) { box-shadow: 0 0 10px rgba(255, 95, 87, 0.45); }
+  .panel-header:hover .panel-dots span:nth-child(2) { box-shadow: 0 0 10px rgba(254, 188, 46, 0.45); }
+  .panel-header:hover .panel-dots span:nth-child(3) { box-shadow: 0 0 10px rgba(40, 200, 64, 0.45); }
+
+  .panel-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-3);
+  }
+
+  .panel-meta .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 6px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  /* 预览头部 meta 区域：语言选择器 + 徽章 */
+  .preview-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .preview-meta .lang-select {
+    min-width: 0;
+    width: 160px;
+  }
+
+  .preview-meta .lang-trigger {
+    padding: 5px 10px;
+    font-size: 12px;
+    gap: 8px;
+    border-radius: 8px;
+  }
+
+  .preview-meta .lang-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  /* 编辑器面板 */
+  .editor-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+  }
+
+  .editor-gutter {
+    flex-shrink: 0;
+    width: 48px;
+    padding: 18px 0;
+    text-align: right;
+    background: rgba(0, 0, 0, 0.25);
+    border-right: 1px solid var(--glass-border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-4);
+    user-select: none;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .editor-gutter div {
+    padding: 0 12px 0 0;
+  }
+
+  .editor-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    resize: none;
+    padding: 18px 20px;
+    background: transparent;
+    color: var(--text-1);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.6;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    caret-color: var(--accent);
+    tab-size: 2;
+    overflow: auto;
+    transition: background 0.3s ease;
+  }
+
+  .editor-input:focus {
+    background: rgba(110, 168, 255, 0.015);
+  }
+
+  .editor-input::placeholder {
+    color: var(--text-4);
+  }
+
+  .editor-input::selection {
+    background: var(--accent-soft);
+  }
+
+  /* 预览区选中高亮 */
+  .preview-code pre::selection,
+  .preview-code code::selection,
+  .preview-code pre *::selection,
+  .preview-code code *::selection {
+    background: rgba(110, 168, 255, 0.25);
+    color: inherit;
+  }
+
+  /* 统一的滚动条样式 —— 左右两边完全一致 */
+  .editor-input::-webkit-scrollbar,
+  .preview-wrap::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .editor-input::-webkit-scrollbar-track,
+  .preview-wrap::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .editor-input::-webkit-scrollbar-thumb,
+  .preview-wrap::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: background 0.3s ease;
+  }
+  .editor-input::-webkit-scrollbar-thumb:hover,
+  .preview-wrap::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.14);
+    background-clip: content-box;
+    border: 2px solid transparent;
+  }
+  .editor-input::-webkit-scrollbar-corner,
+  .preview-wrap::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Firefox 滚动条 */
+  .editor-input,
+  .preview-wrap {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  }
+
+  /* 预览面板 */
+  .preview-wrap {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+  }
+
+  .preview-inner {
+    display: flex;
+    min-height: 100%;
+  }
+
+  .preview-gutter {
+    flex-shrink: 0;
+    width: 48px;
+    padding: 18px 0;
+    text-align: right;
+    background: rgba(0, 0, 0, 0.25);
+    border-right: 1px solid var(--glass-border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-4);
+    user-select: none;
+    overflow: hidden;
+    white-space: nowrap;
+    /* 让 gutter 跟随 preview-wrap 滚动 */
+    position: sticky;
+    left: 0;
+    z-index: 1;
+  }
+
+  .preview-gutter div {
+    padding: 0 12px 0 0;
+  }
+
+  .preview-code {
+    flex: 1;
+    overflow-x: auto;
+    padding: 18px 22px;
+  }
+
+  .preview-code pre {
+    margin: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.6;
+    background: transparent !important;
+    padding: 0;
+  }
+
+  .preview-code code {
+    font-family: 'JetBrains Mono', monospace;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  /* ============ 多主题高亮配色 ============ */
+  /* 通过 .preview-code[data-theme="xxx"] 切换 */
+
+  /* —— 通用基础 —— */
+  .preview-code .hljs { background: transparent; }
+  .preview-code .hljs-emphasis { font-style: italic; }
+  .preview-code .hljs-strong { font-weight: 700; }
+
+  /* —— Theme: Lumen（液态玻璃 · 柔和暗色）—— */
+  .preview-code[data-theme="lumen"] .hljs { color: #e4e4e7; }
+  .preview-code[data-theme="lumen"] .hljs-comment,
+  .preview-code[data-theme="lumen"] .hljs-quote { color: #5a5a63; font-style: italic; }
+  .preview-code[data-theme="lumen"] .hljs-keyword,
+  .preview-code[data-theme="lumen"] .hljs-selector-tag,
+  .preview-code[data-theme="lumen"] .hljs-built_in { color: #7eb6ff; }
+  .preview-code[data-theme="lumen"] .hljs-string,
+  .preview-code[data-theme="lumen"] .hljs-attr { color: #a5d6a7; }
+  .preview-code[data-theme="lumen"] .hljs-number,
+  .preview-code[data-theme="lumen"] .hljs-literal { color: #f0b67f; }
+  .preview-code[data-theme="lumen"] .hljs-title,
+  .preview-code[data-theme="lumen"] .hljs-section,
+  .preview-code[data-theme="lumen"] .hljs-function .hljs-title { color: #ffd479; }
+  .preview-code[data-theme="lumen"] .hljs-params { color: #e4e4e7; }
+  .preview-code[data-theme="lumen"] .hljs-type,
+  .preview-code[data-theme="lumen"] .hljs-class .hljs-title { color: #f9a8d4; }
+  .preview-code[data-theme="lumen"] .hljs-variable,
+  .preview-code[data-theme="lumen"] .hljs-template-variable { color: #c5cae9; }
+  .preview-code[data-theme="lumen"] .hljs-tag { color: #90caf9; }
+  .preview-code[data-theme="lumen"] .hljs-name { color: #7eb6ff; }
+  .preview-code[data-theme="lumen"] .hljs-attribute { color: #ffd479; }
+  .preview-code[data-theme="lumen"] .hljs-symbol,
+  .preview-code[data-theme="lumen"] .hljs-bullet,
+  .preview-code[data-theme="lumen"] .hljs-meta { color: #b39ddb; }
+  .preview-code[data-theme="lumen"] .hljs-regexp { color: #f472b6; }
+  .preview-code[data-theme="lumen"] .hljs-link { color: #5ee0d0; text-decoration: underline; }
+  .preview-code[data-theme="lumen"] .hljs-deletion { color: #ef9a9a; }
+  .preview-code[data-theme="lumen"] .hljs-addition { color: #a5d6a7; }
+
+  /* —— Theme: Aurora（极光 · 青蓝主调）—— */
+  .preview-code[data-theme="aurora"] .hljs { color: #d4f1f4; }
+  .preview-code[data-theme="aurora"] .hljs-comment,
+  .preview-code[data-theme="aurora"] .hljs-quote { color: #4a6670; font-style: italic; }
+  .preview-code[data-theme="aurora"] .hljs-keyword,
+  .preview-code[data-theme="aurora"] .hljs-selector-tag,
+  .preview-code[data-theme="aurora"] .hljs-built_in { color: #00d4ff; }
+  .preview-code[data-theme="aurora"] .hljs-string,
+  .preview-code[data-theme="aurora"] .hljs-attr { color: #5eead4; }
+  .preview-code[data-theme="aurora"] .hljs-number,
+  .preview-code[data-theme="aurora"] .hljs-literal { color: #fcd34d; }
+  .preview-code[data-theme="aurora"] .hljs-title,
+  .preview-code[data-theme="aurora"] .hljs-section,
+  .preview-code[data-theme="aurora"] .hljs-function .hljs-title { color: #67e8f9; }
+  .preview-code[data-theme="aurora"] .hljs-params { color: #d4f1f4; }
+  .preview-code[data-theme="aurora"] .hljs-type,
+  .preview-code[data-theme="aurora"] .hljs-class .hljs-title { color: #a5f3fc; }
+  .preview-code[data-theme="aurora"] .hljs-variable,
+  .preview-code[data-theme="aurora"] .hljs-template-variable { color: #bae6fd; }
+  .preview-code[data-theme="aurora"] .hljs-tag { color: #38bdf8; }
+  .preview-code[data-theme="aurora"] .hljs-name { color: #22d3ee; }
+  .preview-code[data-theme="aurora"] .hljs-attribute { color: #fde68a; }
+  .preview-code[data-theme="aurora"] .hljs-symbol,
+  .preview-code[data-theme="aurora"] .hljs-bullet,
+  .preview-code[data-theme="aurora"] .hljs-meta { color: #7dd3fc; }
+  .preview-code[data-theme="aurora"] .hljs-regexp { color: #f0abfc; }
+  .preview-code[data-theme="aurora"] .hljs-link { color: #2dd4bf; text-decoration: underline; }
+  .preview-code[data-theme="aurora"] .hljs-deletion { color: #fda4af; }
+  .preview-code[data-theme="aurora"] .hljs-addition { color: #6ee7b7; }
+
+  /* —— Theme: Synthwave（合成波 · 紫粉霓虹）—— */
+  .preview-code[data-theme="synthwave"] .hljs { color: #f5e9ff; }
+  .preview-code[data-theme="synthwave"] .hljs-comment,
+  .preview-code[data-theme="synthwave"] .hljs-quote { color: #6b5b8e; font-style: italic; }
+  .preview-code[data-theme="synthwave"] .hljs-keyword,
+  .preview-code[data-theme="synthwave"] .hljs-selector-tag,
+  .preview-code[data-theme="synthwave"] .hljs-built_in { color: #ff7edb; font-weight: 500; }
+  .preview-code[data-theme="synthwave"] .hljs-string,
+  .preview-code[data-theme="synthwave"] .hljs-attr { color: #fede5d; }
+  .preview-code[data-theme="synthwave"] .hljs-number,
+  .preview-code[data-theme="synthwave"] .hljs-literal { color: #ff8c42; }
+  .preview-code[data-theme="synthwave"] .hljs-title,
+  .preview-code[data-theme="synthwave"] .hljs-section,
+  .preview-code[data-theme="synthwave"] .hljs-function .hljs-title { color: #c792ea; }
+  .preview-code[data-theme="synthwave"] .hljs-params { color: #f5e9ff; }
+  .preview-code[data-theme="synthwave"] .hljs-type,
+  .preview-code[data-theme="synthwave"] .hljs-class .hljs-title { color: #f99bff; }
+  .preview-code[data-theme="synthwave"] .hljs-variable,
+  .preview-code[data-theme="synthwave"] .hljs-template-variable { color: #d6b3ff; }
+  .preview-code[data-theme="synthwave"] .hljs-tag { color: #ff7edb; }
+  .preview-code[data-theme="synthwave"] .hljs-name { color: #ff9ce6; }
+  .preview-code[data-theme="synthwave"] .hljs-attribute { color: #ffd86b; }
+  .preview-code[data-theme="synthwave"] .hljs-symbol,
+  .preview-code[data-theme="synthwave"] .hljs-bullet,
+  .preview-code[data-theme="synthwave"] .hljs-meta { color: #82aaff; }
+  .preview-code[data-theme="synthwave"] .hljs-regexp { color: #ff6ac1; }
+  .preview-code[data-theme="synthwave"] .hljs-link { color: #7af8ca; text-decoration: underline; }
+  .preview-code[data-theme="synthwave"] .hljs-deletion { color: #ff5e7e; }
+  .preview-code[data-theme="synthwave"] .hljs-addition { color: #95ff95; }
+
+  /* —— Theme: Ember（余烬 · 暖橙红）—— */
+  .preview-code[data-theme="ember"] .hljs { color: #fef3e8; }
+  .preview-code[data-theme="ember"] .hljs-comment,
+  .preview-code[data-theme="ember"] .hljs-quote { color: #7a6655; font-style: italic; }
+  .preview-code[data-theme="ember"] .hljs-keyword,
+  .preview-code[data-theme="ember"] .hljs-selector-tag,
+  .preview-code[data-theme="ember"] .hljs-built_in { color: #ff7847; }
+  .preview-code[data-theme="ember"] .hljs-string,
+  .preview-code[data-theme="ember"] .hljs-attr { color: #ffb86b; }
+  .preview-code[data-theme="ember"] .hljs-number,
+  .preview-code[data-theme="ember"] .hljs-literal { color: #f9d76c; }
+  .preview-code[data-theme="ember"] .hljs-title,
+  .preview-code[data-theme="ember"] .hljs-section,
+  .preview-code[data-theme="ember"] .hljs-function .hljs-title { color: #ff9e64; }
+  .preview-code[data-theme="ember"] .hljs-params { color: #fef3e8; }
+  .preview-code[data-theme="ember"] .hljs-type,
+  .preview-code[data-theme="ember"] .hljs-class .hljs-title { color: #ffba87; }
+  .preview-code[data-theme="ember"] .hljs-variable,
+  .preview-code[data-theme="ember"] .hljs-template-variable { color: #ffd9a8; }
+  .preview-code[data-theme="ember"] .hljs-tag { color: #ff8e53; }
+  .preview-code[data-theme="ember"] .hljs-name { color: #ff7847; }
+  .preview-code[data-theme="ember"] .hljs-attribute { color: #f9d76c; }
+  .preview-code[data-theme="ember"] .hljs-symbol,
+  .preview-code[data-theme="ember"] .hljs-bullet,
+  .preview-code[data-theme="ember"] .hljs-meta { color: #e8a87c; }
+  .preview-code[data-theme="ember"] .hljs-regexp { color: #ff5e7e; }
+  .preview-code[data-theme="ember"] .hljs-link { color: #ffd166; text-decoration: underline; }
+  .preview-code[data-theme="ember"] .hljs-deletion { color: #ef5350; }
+  .preview-code[data-theme="ember"] .hljs-addition { color: #b5e48c; }
+
+  /* —— Theme: Forest（森林 · 翠绿主调）—— */
+  .preview-code[data-theme="forest"] .hljs { color: #e8f5e9; }
+  .preview-code[data-theme="forest"] .hljs-comment,
+  .preview-code[data-theme="forest"] .hljs-quote { color: #5a7355; font-style: italic; }
+  .preview-code[data-theme="forest"] .hljs-keyword,
+  .preview-code[data-theme="forest"] .hljs-selector-tag,
+  .preview-code[data-theme="forest"] .hljs-built_in { color: #81c784; }
+  .preview-code[data-theme="forest"] .hljs-string,
+  .preview-code[data-theme="forest"] .hljs-attr { color: #c5e1a5; }
+  .preview-code[data-theme="forest"] .hljs-number,
+  .preview-code[data-theme="forest"] .hljs-literal { color: #ffb74d; }
+  .preview-code[data-theme="forest"] .hljs-title,
+  .preview-code[data-theme="forest"] .hljs-section,
+  .preview-code[data-theme="forest"] .hljs-function .hljs-title { color: #a5d6a7; }
+  .preview-code[data-theme="forest"] .hljs-params { color: #e8f5e9; }
+  .preview-code[data-theme="forest"] .hljs-type,
+  .preview-code[data-theme="forest"] .hljs-class .hljs-title { color: #dce775; }
+  .preview-code[data-theme="forest"] .hljs-variable,
+  .preview-code[data-theme="forest"] .hljs-template-variable { color: #c8e6c9; }
+  .preview-code[data-theme="forest"] .hljs-tag { color: #66bb6a; }
+  .preview-code[data-theme="forest"] .hljs-name { color: #81c784; }
+  .preview-code[data-theme="forest"] .hljs-attribute { color: #ffd54f; }
+  .preview-code[data-theme="forest"] .hljs-symbol,
+  .preview-code[data-theme="forest"] .hljs-bullet,
+  .preview-code[data-theme="forest"] .hljs-meta { color: #bcaaa4; }
+  .preview-code[data-theme="forest"] .hljs-regexp { color: #f48fb1; }
+  .preview-code[data-theme="forest"] .hljs-link { color: #80cbc4; text-decoration: underline; }
+  .preview-code[data-theme="forest"] .hljs-deletion { color: #ef9a9a; }
+  .preview-code[data-theme="forest"] .hljs-addition { color: #aed581; }
+
+  /* —— Theme: Mono（极简单色 · 银白灰阶）—— */
+  .preview-code[data-theme="mono"] .hljs { color: #e8e8eb; }
+  .preview-code[data-theme="mono"] .hljs-comment,
+  .preview-code[data-theme="mono"] .hljs-quote { color: #555560; font-style: italic; }
+  .preview-code[data-theme="mono"] .hljs-keyword,
+  .preview-code[data-theme="mono"] .hljs-selector-tag,
+  .preview-code[data-theme="mono"] .hljs-built_in { color: #ffffff; font-weight: 600; }
+  .preview-code[data-theme="mono"] .hljs-string,
+  .preview-code[data-theme="mono"] .hljs-attr { color: #c0c0c8; }
+  .preview-code[data-theme="mono"] .hljs-number,
+  .preview-code[data-theme="mono"] .hljs-literal { color: #a8a8b0; }
+  .preview-code[data-theme="mono"] .hljs-title,
+  .preview-code[data-theme="mono"] .hljs-section,
+  .preview-code[data-theme="mono"] .hljs-function .hljs-title { color: #f0f0f3; }
+  .preview-code[data-theme="mono"] .hljs-params { color: #e8e8eb; }
+  .preview-code[data-theme="mono"] .hljs-type,
+  .preview-code[data-theme="mono"] .hljs-class .hljs-title { color: #d8d8de; font-style: italic; }
+  .preview-code[data-theme="mono"] .hljs-variable,
+  .preview-code[data-theme="mono"] .hljs-template-variable { color: #b8b8c0; }
+  .preview-code[data-theme="mono"] .hljs-tag { color: #9898a0; }
+  .preview-code[data-theme="mono"] .hljs-name { color: #ffffff; }
+  .preview-code[data-theme="mono"] .hljs-attribute { color: #c8c8d0; }
+  .preview-code[data-theme="mono"] .hljs-symbol,
+  .preview-code[data-theme="mono"] .hljs-bullet,
+  .preview-code[data-theme="mono"] .hljs-meta { color: #8888a0; }
+  .preview-code[data-theme="mono"] .hljs-regexp { color: #a0a0a8; }
+  .preview-code[data-theme="mono"] .hljs-link { color: #9898a0; text-decoration: underline; }
+  .preview-code[data-theme="mono"] .hljs-deletion { color: #888890; }
+  .preview-code[data-theme="mono"] .hljs-addition { color: #d0d0d8; }
+
+  /* —— Theme: Tokyo Night（东京夜 · 深蓝紫调）—— */
+  .preview-code[data-theme="tokyo"] .hljs { color: #c0caf5; }
+  .preview-code[data-theme="tokyo"] .hljs-comment,
+  .preview-code[data-theme="tokyo"] .hljs-quote { color: #565f89; font-style: italic; }
+  .preview-code[data-theme="tokyo"] .hljs-keyword,
+  .preview-code[data-theme="tokyo"] .hljs-selector-tag,
+  .preview-code[data-theme="tokyo"] .hljs-built_in { color: #7dcfff; }
+  .preview-code[data-theme="tokyo"] .hljs-string,
+  .preview-code[data-theme="tokyo"] .hljs-attr { color: #9ece6a; }
+  .preview-code[data-theme="tokyo"] .hljs-number,
+  .preview-code[data-theme="tokyo"] .hljs-literal { color: #ff9e64; }
+  .preview-code[data-theme="tokyo"] .hljs-title,
+  .preview-code[data-theme="tokyo"] .hljs-section,
+  .preview-code[data-theme="tokyo"] .hljs-function .hljs-title { color: #7aa2f7; }
+  .preview-code[data-theme="tokyo"] .hljs-params { color: #c0caf5; }
+  .preview-code[data-theme="tokyo"] .hljs-type,
+  .preview-code[data-theme="tokyo"] .hljs-class .hljs-title { color: #2ac3de; }
+  .preview-code[data-theme="tokyo"] .hljs-variable,
+  .preview-code[data-theme="tokyo"] .hljs-template-variable { color: #e0af68; }
+  .preview-code[data-theme="tokyo"] .hljs-tag { color: #89ddff; }
+  .preview-code[data-theme="tokyo"] .hljs-name { color: #7dcfff; }
+  .preview-code[data-theme="tokyo"] .hljs-attribute { color: #bb9af7; }
+  .preview-code[data-theme="tokyo"] .hljs-symbol,
+  .preview-code[data-theme="tokyo"] .hljs-bullet,
+  .preview-code[data-theme="tokyo"] .hljs-meta { color: #bb9af7; }
+  .preview-code[data-theme="tokyo"] .hljs-regexp { color: #f7768e; }
+  .preview-code[data-theme="tokyo"] .hljs-link { color: #7dcfff; text-decoration: underline; }
+  .preview-code[data-theme="tokyo"] .hljs-deletion { color: #f7768e; }
+  .preview-code[data-theme="tokyo"] .hljs-addition { color: #9ece6a; }
+
+  /* —— Theme: Dracula（吸血鬼 · 经典暗紫粉）—— */
+  .preview-code[data-theme="dracula"] .hljs { color: #f8f8f2; }
+  .preview-code[data-theme="dracula"] .hljs-comment,
+  .preview-code[data-theme="dracula"] .hljs-quote { color: #6272a4; font-style: italic; }
+  .preview-code[data-theme="dracula"] .hljs-keyword,
+  .preview-code[data-theme="dracula"] .hljs-selector-tag,
+  .preview-code[data-theme="dracula"] .hljs-built_in { color: #ff79c6; }
+  .preview-code[data-theme="dracula"] .hljs-string,
+  .preview-code[data-theme="dracula"] .hljs-attr { color: #f1fa8c; }
+  .preview-code[data-theme="dracula"] .hljs-number,
+  .preview-code[data-theme="dracula"] .hljs-literal { color: #bd93f9; }
+  .preview-code[data-theme="dracula"] .hljs-title,
+  .preview-code[data-theme="dracula"] .hljs-section,
+  .preview-code[data-theme="dracula"] .hljs-function .hljs-title { color: #50fa7b; }
+  .preview-code[data-theme="dracula"] .hljs-params { color: #f8f8f2; }
+  .preview-code[data-theme="dracula"] .hljs-type,
+  .preview-code[data-theme="dracula"] .hljs-class .hljs-title { color: #8be9fd; }
+  .preview-code[data-theme="dracula"] .hljs-variable,
+  .preview-code[data-theme="dracula"] .hljs-template-variable { color: #f8f8f2; }
+  .preview-code[data-theme="dracula"] .hljs-tag { color: #ff79c6; }
+  .preview-code[data-theme="dracula"] .hljs-name { color: #7ee787; }
+  .preview-code[data-theme="dracula"] .hljs-attribute { color: #50fa7b; }
+  .preview-code[data-theme="dracula"] .hljs-symbol,
+  .preview-code[data-theme="dracula"] .hljs-bullet,
+  .preview-code[data-theme="dracula"] .hljs-meta { color: #bd93f9; }
+  .preview-code[data-theme="dracula"] .hljs-regexp { color: #ffb86c; }
+  .preview-code[data-theme="dracula"] .hljs-link { color: #8be9fd; text-decoration: underline; }
+  .preview-code[data-theme="dracula"] .hljs-deletion { color: #ff5555; }
+  .preview-code[data-theme="dracula"] .hljs-addition { color: #50fa7b; }
+
+  /* —— Theme: Nordic（北欧 · 冷蓝灰 Nord 色板）—— */
+  .preview-code[data-theme="nordic"] .hljs { color: #d8dee9; }
+  .preview-code[data-theme="nordic"] .hljs-comment,
+  .preview-code[data-theme="nordic"] .hljs-quote { color: #4c566a; font-style: italic; }
+  .preview-code[data-theme="nordic"] .hljs-keyword,
+  .preview-code[data-theme="nordic"] .hljs-selector-tag,
+  .preview-code[data-theme="nordic"] .hljs-built_in { color: #81a1c1; }
+  .preview-code[data-theme="nordic"] .hljs-string,
+  .preview-code[data-theme="nordic"] .hljs-attr { color: #a3be8c; }
+  .preview-code[data-theme="nordic"] .hljs-number,
+  .preview-code[data-theme="nordic"] .hljs-literal { color: #b48ead; }
+  .preview-code[data-theme="nordic"] .hljs-title,
+  .preview-code[data-theme="nordic"] .hljs-section,
+  .preview-code[data-theme="nordic"] .hljs-function .hljs-title { color: #88c0d0; }
+  .preview-code[data-theme="nordic"] .hljs-params { color: #d8dee9; }
+  .preview-code[data-theme="nordic"] .hljs-type,
+  .preview-code[data-theme="nordic"] .hljs-class .hljs-title { color: #8fbcbb; }
+  .preview-code[data-theme="nordic"] .hljs-variable,
+  .preview-code[data-theme="nordic"] .hljs-template-variable { color: #d8dee9; }
+  .preview-code[data-theme="nordic"] .hljs-tag { color: #81a1c1; }
+  .preview-code[data-theme="nordic"] .hljs-name { color: #8fbcbb; }
+  .preview-code[data-theme="nordic"] .hljs-attribute { color: #ebcb8b; }
+  .preview-code[data-theme="nordic"] .hljs-symbol,
+  .preview-code[data-theme="nordic"] .hljs-bullet,
+  .preview-code[data-theme="nordic"] .hljs-meta { color: #b48ead; }
+  .preview-code[data-theme="nordic"] .hljs-regexp { color: #bf616a; }
+  .preview-code[data-theme="nordic"] .hljs-link { color: #88c0d0; text-decoration: underline; }
+  .preview-code[data-theme="nordic"] .hljs-deletion { color: #bf616a; }
+  .preview-code[data-theme="nordic"] .hljs-addition { color: #a3be8c; }
+
+  /* —— Theme: Solarized（日光暗 · 经典青蓝琥珀）—— */
+  .preview-code[data-theme="solar"] .hljs { color: #93a1a1; }
+  .preview-code[data-theme="solar"] .hljs-comment,
+  .preview-code[data-theme="solar"] .hljs-quote { color: #586e75; font-style: italic; }
+  .preview-code[data-theme="solar"] .hljs-keyword,
+  .preview-code[data-theme="solar"] .hljs-selector-tag,
+  .preview-code[data-theme="solar"] .hljs-built_in { color: #859900; }
+  .preview-code[data-theme="solar"] .hljs-string,
+  .preview-code[data-theme="solar"] .hljs-attr { color: #2aa198; }
+  .preview-code[data-theme="solar"] .hljs-number,
+  .preview-code[data-theme="solar"] .hljs-literal { color: #d33682; }
+  .preview-code[data-theme="solar"] .hljs-title,
+  .preview-code[data-theme="solar"] .hljs-section,
+  .preview-code[data-theme="solar"] .hljs-function .hljs-title { color: #268bd2; }
+  .preview-code[data-theme="solar"] .hljs-params { color: #93a1a1; }
+  .preview-code[data-theme="solar"] .hljs-type,
+  .preview-code[data-theme="solar"] .hljs-class .hljs-title { color: #b58900; }
+  .preview-code[data-theme="solar"] .hljs-variable,
+  .preview-code[data-theme="solar"] .hljs-template-variable { color: #cb4b16; }
+  .preview-code[data-theme="solar"] .hljs-tag { color: #268bd2; }
+  .preview-code[data-theme="solar"] .hljs-name { color: #859900; }
+  .preview-code[data-theme="solar"] .hljs-attribute { color: #b58900; }
+  .preview-code[data-theme="solar"] .hljs-symbol,
+  .preview-code[data-theme="solar"] .hljs-bullet,
+  .preview-code[data-theme="solar"] .hljs-meta { color: #d33682; }
+  .preview-code[data-theme="solar"] .hljs-regexp { color: #d30102; }
+  .preview-code[data-theme="solar"] .hljs-link { color: #2aa198; text-decoration: underline; }
+  .preview-code[data-theme="solar"] .hljs-deletion { color: #dc322f; }
+  .preview-code[data-theme="solar"] .hljs-addition { color: #859900; }
+
+  /* —— Theme: Cyberpunk（赛博朋克 · 霓虹黄绿粉）—— */
+  .preview-code[data-theme="cyber"] .hljs { color: #e0e0e0; }
+  .preview-code[data-theme="cyber"] .hljs-comment,
+  .preview-code[data-theme="cyber"] .hljs-quote { color: #4a5a4a; font-style: italic; }
+  .preview-code[data-theme="cyber"] .hljs-keyword,
+  .preview-code[data-theme="cyber"] .hljs-selector-tag,
+  .preview-code[data-theme="cyber"] .hljs-built_in { color: #ff00ff; font-weight: 500; }
+  .preview-code[data-theme="cyber"] .hljs-string,
+  .preview-code[data-theme="cyber"] .hljs-attr { color: #ffff00; }
+  .preview-code[data-theme="cyber"] .hljs-number,
+  .preview-code[data-theme="cyber"] .hljs-literal { color: #00ffff; }
+  .preview-code[data-theme="cyber"] .hljs-title,
+  .preview-code[data-theme="cyber"] .hljs-section,
+  .preview-code[data-theme="cyber"] .hljs-function .hljs-title { color: #00ff00; }
+  .preview-code[data-theme="cyber"] .hljs-params { color: #e0e0e0; }
+  .preview-code[data-theme="cyber"] .hljs-type,
+  .preview-code[data-theme="cyber"] .hljs-class .hljs-title { color: #ff6b00; }
+  .preview-code[data-theme="cyber"] .hljs-variable,
+  .preview-code[data-theme="cyber"] .hljs-template-variable { color: #b0ffb0; }
+  .preview-code[data-theme="cyber"] .hljs-tag { color: #ff00ff; }
+  .preview-code[data-theme="cyber"] .hljs-name { color: #00ffaa; }
+  .preview-code[data-theme="cyber"] .hljs-attribute { color: #ffaa00; }
+  .preview-code[data-theme="cyber"] .hljs-symbol,
+  .preview-code[data-theme="cyber"] .hljs-bullet,
+  .preview-code[data-theme="cyber"] .hljs-meta { color: #aa00ff; }
+  .preview-code[data-theme="cyber"] .hljs-regexp { color: #ff0080; }
+  .preview-code[data-theme="cyber"] .hljs-link { color: #00ffff; text-decoration: underline; }
+  .preview-code[data-theme="cyber"] .hljs-deletion { color: #ff0040; }
+  .preview-code[data-theme="cyber"] .hljs-addition { color: #00ff80; }
+
+  /* —— Theme: Rose Pine（玫瑰松 · 柔和玫瑰金紫）—— */
+  .preview-code[data-theme="rosepine"] .hljs { color: #e0def4; }
+  .preview-code[data-theme="rosepine"] .hljs-comment,
+  .preview-code[data-theme="rosepine"] .hljs-quote { color: #6e6a86; font-style: italic; }
+  .preview-code[data-theme="rosepine"] .hljs-keyword,
+  .preview-code[data-theme="rosepine"] .hljs-selector-tag,
+  .preview-code[data-theme="rosepine"] .hljs-built_in { color: #31748f; }
+  .preview-code[data-theme="rosepine"] .hljs-string,
+  .preview-code[data-theme="rosepine"] .hljs-attr { color: #ebbcba; }
+  .preview-code[data-theme="rosepine"] .hljs-number,
+  .preview-code[data-theme="rosepine"] .hljs-literal { color: #ebbcba; }
+  .preview-code[data-theme="rosepine"] .hljs-title,
+  .preview-code[data-theme="rosepine"] .hljs-section,
+  .preview-code[data-theme="rosepine"] .hljs-function .hljs-title { color: #9ccfd8; }
+  .preview-code[data-theme="rosepine"] .hljs-params { color: #e0def4; }
+  .preview-code[data-theme="rosepine"] .hljs-type,
+  .preview-code[data-theme="rosepine"] .hljs-class .hljs-title { color: #f6c177; }
+  .preview-code[data-theme="rosepine"] .hljs-variable,
+  .preview-code[data-theme="rosepine"] .hljs-template-variable { color: #ea9a97; }
+  .preview-code[data-theme="rosepine"] .hljs-tag { color: #31748f; }
+  .preview-code[data-theme="rosepine"] .hljs-name { color: #9ccfd8; }
+  .preview-code[data-theme="rosepine"] .hljs-attribute { color: #f6c177; }
+  .preview-code[data-theme="rosepine"] .hljs-symbol,
+  .preview-code[data-theme="rosepine"] .hljs-bullet,
+  .preview-code[data-theme="rosepine"] .hljs-meta { color: #c4a7e7; }
+  .preview-code[data-theme="rosepine"] .hljs-regexp { color: #ebbcba; }
+  .preview-code[data-theme="rosepine"] .hljs-link { color: #9ccfd8; text-decoration: underline; }
+  .preview-code[data-theme="rosepine"] .hljs-deletion { color: #eb6f92; }
+  .preview-code[data-theme="rosepine"] .hljs-addition { color: #9ccfd8; }
+
+  /* —— Theme: Gruvbox（暖色复古 · 土金棕）—— */
+  .preview-code[data-theme="gruvbox"] .hljs { color: #ebdbb2; }
+  .preview-code[data-theme="gruvbox"] .hljs-comment,
+  .preview-code[data-theme="gruvbox"] .hljs-quote { color: #928374; font-style: italic; }
+  .preview-code[data-theme="gruvbox"] .hljs-keyword,
+  .preview-code[data-theme="gruvbox"] .hljs-selector-tag,
+  .preview-code[data-theme="gruvbox"] .hljs-built_in { color: #fb4934; }
+  .preview-code[data-theme="gruvbox"] .hljs-string,
+  .preview-code[data-theme="gruvbox"] .hljs-attr { color: #b8bb26; }
+  .preview-code[data-theme="gruvbox"] .hljs-number,
+  .preview-code[data-theme="gruvbox"] .hljs-literal { color: #d3869b; }
+  .preview-code[data-theme="gruvbox"] .hljs-title,
+  .preview-code[data-theme="gruvbox"] .hljs-section,
+  .preview-code[data-theme="gruvbox"] .hljs-function .hljs-title { color: #fabd2f; }
+  .preview-code[data-theme="gruvbox"] .hljs-params { color: #ebdbb2; }
+  .preview-code[data-theme="gruvbox"] .hljs-type,
+  .preview-code[data-theme="gruvbox"] .hljs-class .hljs-title { color: #fabd2f; }
+  .preview-code[data-theme="gruvbox"] .hljs-variable,
+  .preview-code[data-theme="gruvbox"] .hljs-template-variable { color: #83a598; }
+  .preview-code[data-theme="gruvbox"] .hljs-tag { color: #fb4934; }
+  .preview-code[data-theme="gruvbox"] .hljs-name { color: #fb4934; }
+  .preview-code[data-theme="gruvbox"] .hljs-attribute { color: #fabd2f; }
+  .preview-code[data-theme="gruvbox"] .hljs-symbol,
+  .preview-code[data-theme="gruvbox"] .hljs-bullet,
+  .preview-code[data-theme="gruvbox"] .hljs-meta { color: #83a598; }
+  .preview-code[data-theme="gruvbox"] .hljs-regexp { color: #fe8019; }
+  .preview-code[data-theme="gruvbox"] .hljs-link { color: #8ec07c; text-decoration: underline; }
+  .preview-code[data-theme="gruvbox"] .hljs-deletion { color: #fb4934; }
+  .preview-code[data-theme="gruvbox"] .hljs-addition { color: #b8bb26; }
+
+  /* —— Theme: One Dark（Atom · 冷蓝紫）—— */
+  .preview-code[data-theme="onedark"] .hljs { color: #abb2bf; }
+  .preview-code[data-theme="onedark"] .hljs-comment,
+  .preview-code[data-theme="onedark"] .hljs-quote { color: #5c6370; font-style: italic; }
+  .preview-code[data-theme="onedark"] .hljs-keyword,
+  .preview-code[data-theme="onedark"] .hljs-selector-tag,
+  .preview-code[data-theme="onedark"] .hljs-built_in { color: #c678dd; }
+  .preview-code[data-theme="onedark"] .hljs-string,
+  .preview-code[data-theme="onedark"] .hljs-attr { color: #98c379; }
+  .preview-code[data-theme="onedark"] .hljs-number,
+  .preview-code[data-theme="onedark"] .hljs-literal { color: #d19a66; }
+  .preview-code[data-theme="onedark"] .hljs-title,
+  .preview-code[data-theme="onedark"] .hljs-section,
+  .preview-code[data-theme="onedark"] .hljs-function .hljs-title { color: #61afef; }
+  .preview-code[data-theme="onedark"] .hljs-params { color: #abb2bf; }
+  .preview-code[data-theme="onedark"] .hljs-type,
+  .preview-code[data-theme="onedark"] .hljs-class .hljs-title { color: #e5c07b; }
+  .preview-code[data-theme="onedark"] .hljs-variable,
+  .preview-code[data-theme="onedark"] .hljs-template-variable { color: #e06c75; }
+  .preview-code[data-theme="onedark"] .hljs-tag { color: #e06c75; }
+  .preview-code[data-theme="onedark"] .hljs-name { color: #e06c75; }
+  .preview-code[data-theme="onedark"] .hljs-attribute { color: #d19a66; }
+  .preview-code[data-theme="onedark"] .hljs-symbol,
+  .preview-code[data-theme="onedark"] .hljs-bullet,
+  .preview-code[data-theme="onedark"] .hljs-meta { color: #56b6c2; }
+  .preview-code[data-theme="onedark"] .hljs-regexp { color: #98c379; }
+  .preview-code[data-theme="onedark"] .hljs-link { color: #61afef; text-decoration: underline; }
+  .preview-code[data-theme="onedark"] .hljs-deletion { color: #e06c75; }
+  .preview-code[data-theme="onedark"] .hljs-addition { color: #98c379; }
+
+  /* —— Theme: Monokai（经典 · 黄绿粉紫）—— */
+  .preview-code[data-theme="monokai"] .hljs { color: #f8f8f2; }
+  .preview-code[data-theme="monokai"] .hljs-comment,
+  .preview-code[data-theme="monokai"] .hljs-quote { color: #75715e; font-style: italic; }
+  .preview-code[data-theme="monokai"] .hljs-keyword,
+  .preview-code[data-theme="monokai"] .hljs-selector-tag,
+  .preview-code[data-theme="monokai"] .hljs-built_in { color: #f92672; }
+  .preview-code[data-theme="monokai"] .hljs-string,
+  .preview-code[data-theme="monokai"] .hljs-attr { color: #e6db74; }
+  .preview-code[data-theme="monokai"] .hljs-number,
+  .preview-code[data-theme="monokai"] .hljs-literal { color: #ae81ff; }
+  .preview-code[data-theme="monokai"] .hljs-title,
+  .preview-code[data-theme="monokai"] .hljs-section,
+  .preview-code[data-theme="monokai"] .hljs-function .hljs-title { color: #a6e22e; }
+  .preview-code[data-theme="monokai"] .hljs-params { color: #f8f8f2; }
+  .preview-code[data-theme="monokai"] .hljs-type,
+  .preview-code[data-theme="monokai"] .hljs-class .hljs-title { color: #66d9ef; font-style: italic; }
+  .preview-code[data-theme="monokai"] .hljs-variable,
+  .preview-code[data-theme="monokai"] .hljs-template-variable { color: #f8f8f2; }
+  .preview-code[data-theme="monokai"] .hljs-tag { color: #f92672; }
+  .preview-code[data-theme="monokai"] .hljs-name { color: #a6e22e; }
+  .preview-code[data-theme="monokai"] .hljs-attribute { color: #a6e22e; }
+  .preview-code[data-theme="monokai"] .hljs-symbol,
+  .preview-code[data-theme="monokai"] .hljs-bullet,
+  .preview-code[data-theme="monokai"] .hljs-meta { color: #66d9ef; }
+  .preview-code[data-theme="monokai"] .hljs-regexp { color: #f92672; }
+  .preview-code[data-theme="monokai"] .hljs-link { color: #66d9ef; text-decoration: underline; }
+  .preview-code[data-theme="monokai"] .hljs-deletion { color: #f92672; }
+  .preview-code[data-theme="monokai"] .hljs-addition { color: #a6e22e; }
+
+  /* —— Theme: Material（Material Design · 清爽蓝绿）—— */
+  .preview-code[data-theme="material"] .hljs { color: #eeffff; }
+  .preview-code[data-theme="material"] .hljs-comment,
+  .preview-code[data-theme="material"] .hljs-quote { color: #546e7a; font-style: italic; }
+  .preview-code[data-theme="material"] .hljs-keyword,
+  .preview-code[data-theme="material"] .hljs-selector-tag,
+  .preview-code[data-theme="material"] .hljs-built_in { color: #c792ea; }
+  .preview-code[data-theme="material"] .hljs-string,
+  .preview-code[data-theme="material"] .hljs-attr { color: #c3e88d; }
+  .preview-code[data-theme="material"] .hljs-number,
+  .preview-code[data-theme="material"] .hljs-literal { color: #f78c6c; }
+  .preview-code[data-theme="material"] .hljs-title,
+  .preview-code[data-theme="material"] .hljs-section,
+  .preview-code[data-theme="material"] .hljs-function .hljs-title { color: #82aaff; }
+  .preview-code[data-theme="material"] .hljs-params { color: #eeffff; }
+  .preview-code[data-theme="material"] .hljs-type,
+  .preview-code[data-theme="material"] .hljs-class .hljs-title { color: #ffcb6b; }
+  .preview-code[data-theme="material"] .hljs-variable,
+  .preview-code[data-theme="material"] .hljs-template-variable { color: #eeffff; }
+  .preview-code[data-theme="material"] .hljs-tag { color: #f07178; }
+  .preview-code[data-theme="material"] .hljs-name { color: #f07178; }
+  .preview-code[data-theme="material"] .hljs-attribute { color: #ffcb6b; }
+  .preview-code[data-theme="material"] .hljs-symbol,
+  .preview-code[data-theme="material"] .hljs-bullet,
+  .preview-code[data-theme="material"] .hljs-meta { color: #89ddff; }
+  .preview-code[data-theme="material"] .hljs-regexp { color: #f07178; }
+  .preview-code[data-theme="material"] .hljs-link { color: #82aaff; text-decoration: underline; }
+  .preview-code[data-theme="material"] .hljs-deletion { color: #f07178; }
+  .preview-code[data-theme="material"] .hljs-addition { color: #c3e88d; }
+
+  /* —— Theme: Catppuccin（猫布奇诺 · 柔和薰衣草粉紫）—— */
+  .preview-code[data-theme="catppuccin"] .hljs { color: #cdd6f4; }
+  .preview-code[data-theme="catppuccin"] .hljs-comment,
+  .preview-code[data-theme="catppuccin"] .hljs-quote { color: #6c7086; font-style: italic; }
+  .preview-code[data-theme="catppuccin"] .hljs-keyword,
+  .preview-code[data-theme="catppuccin"] .hljs-selector-tag,
+  .preview-code[data-theme="catppuccin"] .hljs-built_in { color: #cba6f7; }
+  .preview-code[data-theme="catppuccin"] .hljs-string,
+  .preview-code[data-theme="catppuccin"] .hljs-attr { color: #a6e3a1; }
+  .preview-code[data-theme="catppuccin"] .hljs-number,
+  .preview-code[data-theme="catppuccin"] .hljs-literal { color: #fab387; }
+  .preview-code[data-theme="catppuccin"] .hljs-title,
+  .preview-code[data-theme="catppuccin"] .hljs-section,
+  .preview-code[data-theme="catppuccin"] .hljs-function .hljs-title { color: #89b4fa; }
+  .preview-code[data-theme="catppuccin"] .hljs-params { color: #cdd6f4; }
+  .preview-code[data-theme="catppuccin"] .hljs-type,
+  .preview-code[data-theme="catppuccin"] .hljs-class .hljs-title { color: #f9e2af; }
+  .preview-code[data-theme="catppuccin"] .hljs-variable,
+  .preview-code[data-theme="catppuccin"] .hljs-template-variable { color: #f38ba8; }
+  .preview-code[data-theme="catppuccin"] .hljs-tag { color: #cba6f7; }
+  .preview-code[data-theme="catppuccin"] .hljs-name { color: #89b4fa; }
+  .preview-code[data-theme="catppuccin"] .hljs-attribute { color: #f9e2af; }
+  .preview-code[data-theme="catppuccin"] .hljs-symbol,
+  .preview-code[data-theme="catppuccin"] .hljs-bullet,
+  .preview-code[data-theme="catppuccin"] .hljs-meta { color: #94e2d5; }
+  .preview-code[data-theme="catppuccin"] .hljs-regexp { color: #f38ba8; }
+  .preview-code[data-theme="catppuccin"] .hljs-link { color: #89dceb; text-decoration: underline; }
+  .preview-code[data-theme="catppuccin"] .hljs-deletion { color: #f38ba8; }
+  .preview-code[data-theme="catppuccin"] .hljs-addition { color: #a6e3a1; }
+
+  /* —— Theme: GitHub（经典蓝灰 · 开发者标配）—— */
+  .preview-code[data-theme="github"] .hljs { color: #e1e4e8; }
+  .preview-code[data-theme="github"] .hljs-comment,
+  .preview-code[data-theme="github"] .hljs-quote { color: #6a737d; font-style: italic; }
+  .preview-code[data-theme="github"] .hljs-keyword,
+  .preview-code[data-theme="github"] .hljs-selector-tag,
+  .preview-code[data-theme="github"] .hljs-built_in { color: #f97583; }
+  .preview-code[data-theme="github"] .hljs-string,
+  .preview-code[data-theme="github"] .hljs-attr { color: #9ecbff; }
+  .preview-code[data-theme="github"] .hljs-number,
+  .preview-code[data-theme="github"] .hljs-literal { color: #79b8ff; }
+  .preview-code[data-theme="github"] .hljs-title,
+  .preview-code[data-theme="github"] .hljs-section,
+  .preview-code[data-theme="github"] .hljs-function .hljs-title { color: #b392f0; }
+  .preview-code[data-theme="github"] .hljs-params { color: #e1e4e8; }
+  .preview-code[data-theme="github"] .hljs-type,
+  .preview-code[data-theme="github"] .hljs-class .hljs-title { color: #b392f0; }
+  .preview-code[data-theme="github"] .hljs-variable,
+  .preview-code[data-theme="github"] .hljs-template-variable { color: #ffab70; }
+  .preview-code[data-theme="github"] .hljs-tag { color: #85e89d; }
+  .preview-code[data-theme="github"] .hljs-name { color: #85e89d; }
+  .preview-code[data-theme="github"] .hljs-attribute { color: #79b8ff; }
+  .preview-code[data-theme="github"] .hljs-symbol,
+  .preview-code[data-theme="github"] .hljs-bullet,
+  .preview-code[data-theme="github"] .hljs-meta { color: #79b8ff; }
+  .preview-code[data-theme="github"] .hljs-regexp { color: #db61a2; }
+  .preview-code[data-theme="github"] .hljs-link { color: #79b8ff; text-decoration: underline; }
+  .preview-code[data-theme="github"] .hljs-deletion { color: #f97583; }
+  .preview-code[data-theme="github"] .hljs-addition { color: #85e89d; }
+
+  /* —— Theme: Horizon（日落暖橘 · 晚霞色调）—— */
+  .preview-code[data-theme="horizon"] .hljs { color: #FDF0ED; }
+  .preview-code[data-theme="horizon"] .hljs-comment,
+  .preview-code[data-theme="horizon"] .hljs-quote { color: #6C6F93; font-style: italic; }
+  .preview-code[data-theme="horizon"] .hljs-keyword,
+  .preview-code[data-theme="horizon"] .hljs-selector-tag,
+  .preview-code[data-theme="horizon"] .hljs-built_in { color: #B877DB; }
+  .preview-code[data-theme="horizon"] .hljs-string,
+  .preview-code[data-theme="horizon"] .hljs-attr { color: #FADAD1; }
+  .preview-code[data-theme="horizon"] .hljs-number,
+  .preview-code[data-theme="horizon"] .hljs-literal { color: #F79A7B; }
+  .preview-code[data-theme="horizon"] .hljs-title,
+  .preview-code[data-theme="horizon"] .hljs-section,
+  .preview-code[data-theme="horizon"] .hljs-function .hljs-title { color: #F9CEC3; }
+  .preview-code[data-theme="horizon"] .hljs-params { color: #FDF0ED; }
+  .preview-code[data-theme="horizon"] .hljs-type,
+  .preview-code[data-theme="horizon"] .hljs-class .hljs-title { color: #E95678; }
+  .preview-code[data-theme="horizon"] .hljs-variable,
+  .preview-code[data-theme="horizon"] .hljs-template-variable { color: #FDF0ED; }
+  .preview-code[data-theme="horizon"] .hljs-tag { color: #E95678; }
+  .preview-code[data-theme="horizon"] .hljs-name { color: #E95678; }
+  .preview-code[data-theme="horizon"] .hljs-attribute { color: #F9CEC3; }
+  .preview-code[data-theme="horizon"] .hljs-symbol,
+  .preview-code[data-theme="horizon"] .hljs-bullet,
+  .preview-code[data-theme="horizon"] .hljs-meta { color: #25B0BC; }
+  .preview-code[data-theme="horizon"] .hljs-regexp { color: #E95678; }
+  .preview-code[data-theme="horizon"] .hljs-link { color: #25B0BC; text-decoration: underline; }
+  .preview-code[data-theme="horizon"] .hljs-deletion { color: #E95678; }
+  .preview-code[data-theme="horizon"] .hljs-addition { color: #27D797; }
+
+  /* —— Theme: Night Owl（暗夜猫头鹰 · 深蓝紫）—— */
+  .preview-code[data-theme="nightowl"] .hljs { color: #d6deeb; }
+  .preview-code[data-theme="nightowl"] .hljs-comment,
+  .preview-code[data-theme="nightowl"] .hljs-quote { color: #637777; font-style: italic; }
+  .preview-code[data-theme="nightowl"] .hljs-keyword,
+  .preview-code[data-theme="nightowl"] .hljs-selector-tag,
+  .preview-code[data-theme="nightowl"] .hljs-built_in { color: #c792ea; }
+  .preview-code[data-theme="nightowl"] .hljs-string,
+  .preview-code[data-theme="nightowl"] .hljs-attr { color: #ecc48d; }
+  .preview-code[data-theme="nightowl"] .hljs-number,
+  .preview-code[data-theme="nightowl"] .hljs-literal { color: #F78C6C; }
+  .preview-code[data-theme="nightowl"] .hljs-title,
+  .preview-code[data-theme="nightowl"] .hljs-section,
+  .preview-code[data-theme="nightowl"] .hljs-function .hljs-title { color: #82AAFF; }
+  .preview-code[data-theme="nightowl"] .hljs-params { color: #d6deeb; }
+  .preview-code[data-theme="nightowl"] .hljs-type,
+  .preview-code[data-theme="nightowl"] .hljs-class .hljs-title { color: #ffcb8b; }
+  .preview-code[data-theme="nightowl"] .hljs-variable,
+  .preview-code[data-theme="nightowl"] .hljs-template-variable { color: #addb67; }
+  .preview-code[data-theme="nightowl"] .hljs-tag { color: #7fdbca; }
+  .preview-code[data-theme="nightowl"] .hljs-name { color: #caece6; }
+  .preview-code[data-theme="nightowl"] .hljs-attribute { color: #addb67; }
+  .preview-code[data-theme="nightowl"] .hljs-symbol,
+  .preview-code[data-theme="nightowl"] .hljs-bullet,
+  .preview-code[data-theme="nightowl"] .hljs-meta { color: #82AAFF; }
+  .preview-code[data-theme="nightowl"] .hljs-regexp { color: #5ca7e4; }
+  .preview-code[data-theme="nightowl"] .hljs-link { color: #ff6363; text-decoration: underline; }
+  .preview-code[data-theme="nightowl"] .hljs-deletion { color: #ef5350; }
+  .preview-code[data-theme="nightowl"] .hljs-addition { color: #addb67; }
+
+  /* —— Theme: Ayu Dark（暗金 · 暖色暗夜）—— */
+  .preview-code[data-theme="ayu"] .hljs { color: #B3B1AD; }
+  .preview-code[data-theme="ayu"] .hljs-comment,
+  .preview-code[data-theme="ayu"] .hljs-quote { color: #5C6773; font-style: italic; }
+  .preview-code[data-theme="ayu"] .hljs-keyword,
+  .preview-code[data-theme="ayu"] .hljs-selector-tag,
+  .preview-code[data-theme="ayu"] .hljs-built_in { color: #FF7733; }
+  .preview-code[data-theme="ayu"] .hljs-string,
+  .preview-code[data-theme="ayu"] .hljs-attr { color: #BAE67E; }
+  .preview-code[data-theme="ayu"] .hljs-number,
+  .preview-code[data-theme="ayu"] .hljs-literal { color: #D2A6FF; }
+  .preview-code[data-theme="ayu"] .hljs-title,
+  .preview-code[data-theme="ayu"] .hljs-section,
+  .preview-code[data-theme="ayu"] .hljs-function .hljs-title { color: #FFB454; }
+  .preview-code[data-theme="ayu"] .hljs-params { color: #B3B1AD; }
+  .preview-code[data-theme="ayu"] .hljs-type,
+  .preview-code[data-theme="ayu"] .hljs-class .hljs-title { color: #5CCFE6; }
+  .preview-code[data-theme="ayu"] .hljs-variable,
+  .preview-code[data-theme="ayu"] .hljs-template-variable { color: #B3B1AD; }
+  .preview-code[data-theme="ayu"] .hljs-tag { color: #80D4FF; }
+  .preview-code[data-theme="ayu"] .hljs-name { color: #80D4FF; }
+  .preview-code[data-theme="ayu"] .hljs-attribute { color: #FFB454; }
+  .preview-code[data-theme="ayu"] .hljs-symbol,
+  .preview-code[data-theme="ayu"] .hljs-bullet,
+  .preview-code[data-theme="ayu"] .hljs-meta { color: #5CCFE6; }
+  .preview-code[data-theme="ayu"] .hljs-regexp { color: #95E6CB; }
+  .preview-code[data-theme="ayu"] .hljs-link { color: #5CCFE6; text-decoration: underline; }
+  .preview-code[data-theme="ayu"] .hljs-deletion { color: #F07178; }
+  .preview-code[data-theme="ayu"] .hljs-addition { color: #BAE67E; }
+
+  /* —— Theme: Shades of Purple（紫韵 · 全紫色调）—— */
+  .preview-code[data-theme="sop"] .hljs { color: #E1EFFF; }
+  .preview-code[data-theme="sop"] .hljs-comment,
+  .preview-code[data-theme="sop"] .hljs-quote { color: #B362FF; font-style: italic; }
+  .preview-code[data-theme="sop"] .hljs-keyword,
+  .preview-code[data-theme="sop"] .hljs-selector-tag,
+  .preview-code[data-theme="sop"] .hljs-built_in { color: #FF9D00; }
+  .preview-code[data-theme="sop"] .hljs-string,
+  .preview-code[data-theme="sop"] .hljs-attr { color: #A5FF90; }
+  .preview-code[data-theme="sop"] .hljs-number,
+  .preview-code[data-theme="sop"] .hljs-literal { color: #FF628C; }
+  .preview-code[data-theme="sop"] .hljs-title,
+  .preview-code[data-theme="sop"] .hljs-section,
+  .preview-code[data-theme="sop"] .hljs-function .hljs-title { color: #FAD000; }
+  .preview-code[data-theme="sop"] .hljs-params { color: #E1EFFF; }
+  .preview-code[data-theme="sop"] .hljs-type,
+  .preview-code[data-theme="sop"] .hljs-class .hljs-title { color: #9EFFFF; }
+  .preview-code[data-theme="sop"] .hljs-variable,
+  .preview-code[data-theme="sop"] .hljs-template-variable { color: #E1EFFF; }
+  .preview-code[data-theme="sop"] .hljs-tag { color: #9EFFFF; }
+  .preview-code[data-theme="sop"] .hljs-name { color: #9EFFFF; }
+  .preview-code[data-theme="sop"] .hljs-attribute { color: #FAD000; }
+  .preview-code[data-theme="sop"] .hljs-symbol,
+  .preview-code[data-theme="sop"] .hljs-bullet,
+  .preview-code[data-theme="sop"] .hljs-meta { color: #E1EFFF; }
+  .preview-code[data-theme="sop"] .hljs-regexp { color: #FF628C; }
+  .preview-code[data-theme="sop"] .hljs-link { color: #9EFFFF; text-decoration: underline; }
+  .preview-code[data-theme="sop"] .hljs-deletion { color: #FF628C; }
+  .preview-code[data-theme="sop"] .hljs-addition { color: #A5FF90; }
+
+  /* —— Theme: Palenight（淡紫夜 · 紫调 Material）—— */
+  .preview-code[data-theme="palenight"] .hljs { color: #A6ACCD; }
+  .preview-code[data-theme="palenight"] .hljs-comment,
+  .preview-code[data-theme="palenight"] .hljs-quote { color: #676E95; font-style: italic; }
+  .preview-code[data-theme="palenight"] .hljs-keyword,
+  .preview-code[data-theme="palenight"] .hljs-selector-tag,
+  .preview-code[data-theme="palenight"] .hljs-built_in { color: #C792EA; }
+  .preview-code[data-theme="palenight"] .hljs-string,
+  .preview-code[data-theme="palenight"] .hljs-attr { color: #C3E88D; }
+  .preview-code[data-theme="palenight"] .hljs-number,
+  .preview-code[data-theme="palenight"] .hljs-literal { color: #F78C6C; }
+  .preview-code[data-theme="palenight"] .hljs-title,
+  .preview-code[data-theme="palenight"] .hljs-section,
+  .preview-code[data-theme="palenight"] .hljs-function .hljs-title { color: #82AAFF; }
+  .preview-code[data-theme="palenight"] .hljs-params { color: #A6ACCD; }
+  .preview-code[data-theme="palenight"] .hljs-type,
+  .preview-code[data-theme="palenight"] .hljs-class .hljs-title { color: #FFCB6B; }
+  .preview-code[data-theme="palenight"] .hljs-variable,
+  .preview-code[data-theme="palenight"] .hljs-template-variable { color: #EEFFFF; }
+  .preview-code[data-theme="palenight"] .hljs-tag { color: #F07178; }
+  .preview-code[data-theme="palenight"] .hljs-name { color: #F07178; }
+  .preview-code[data-theme="palenight"] .hljs-attribute { color: #C792EA; }
+  .preview-code[data-theme="palenight"] .hljs-symbol,
+  .preview-code[data-theme="palenight"] .hljs-bullet,
+  .preview-code[data-theme="palenight"] .hljs-meta { color: #89DDFF; }
+  .preview-code[data-theme="palenight"] .hljs-regexp { color: #F07178; }
+  .preview-code[data-theme="palenight"] .hljs-link { color: #82AAFF; text-decoration: underline; }
+  .preview-code[data-theme="palenight"] .hljs-deletion { color: #F07178; }
+  .preview-code[data-theme="palenight"] .hljs-addition { color: #C3E88D; }
+
+  /* —— Theme: Vitesse（极速暗夜 · 现代极简）—— */
+  .preview-code[data-theme="vitesse"] .hljs { color: #dbd7caee; }
+  .preview-code[data-theme="vitesse"] .hljs-comment,
+  .preview-code[data-theme="vitesse"] .hljs-quote { color: #758575dd; font-style: italic; }
+  .preview-code[data-theme="vitesse"] .hljs-keyword,
+  .preview-code[data-theme="vitesse"] .hljs-selector-tag,
+  .preview-code[data-theme="vitesse"] .hljs-built_in { color: #CB7676; }
+  .preview-code[data-theme="vitesse"] .hljs-string,
+  .preview-code[data-theme="vitesse"] .hljs-attr { color: #C99076; }
+  .preview-code[data-theme="vitesse"] .hljs-number,
+  .preview-code[data-theme="vitesse"] .hljs-literal { color: #4C9A91; }
+  .preview-code[data-theme="vitesse"] .hljs-title,
+  .preview-code[data-theme="vitesse"] .hljs-section,
+  .preview-code[data-theme="vitesse"] .hljs-function .hljs-title { color: #80A665; }
+  .preview-code[data-theme="vitesse"] .hljs-params { color: #dbd7caee; }
+  .preview-code[data-theme="vitesse"] .hljs-type,
+  .preview-code[data-theme="vitesse"] .hljs-class .hljs-title { color: #5DA9A7; }
+  .preview-code[data-theme="vitesse"] .hljs-variable,
+  .preview-code[data-theme="vitesse"] .hljs-template-variable { color: #BD976A; }
+  .preview-code[data-theme="vitesse"] .hljs-tag { color: #4D9375; }
+  .preview-code[data-theme="vitesse"] .hljs-name { color: #4D9375; }
+  .preview-code[data-theme="vitesse"] .hljs-attribute { color: #C99076; }
+  .preview-code[data-theme="vitesse"] .hljs-symbol,
+  .preview-code[data-theme="vitesse"] .hljs-bullet,
+  .preview-code[data-theme="vitesse"] .hljs-meta { color: #4C9A91; }
+  .preview-code[data-theme="vitesse"] .hljs-regexp { color: #C4704F; }
+  .preview-code[data-theme="vitesse"] .hljs-link { color: #5DA9A7; text-decoration: underline; }
+  .preview-code[data-theme="vitesse"] .hljs-deletion { color: #CB7676; }
+  .preview-code[data-theme="vitesse"] .hljs-addition { color: #80A665; }
+
+
+  /* ============ 底部操作栏 ============ */
+  .actionbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 18px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(48px) saturate(200%);
+    -webkit-backdrop-filter: blur(48px) saturate(200%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-glass), var(--shadow-deep);
+    position: relative;
+    z-index: 20;
+    overflow: hidden;
+  }
+
+  .action-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 11px;
+    color: var(--text-1);
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.35s var(--ease-out-expo);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 顶部高光线 */
+  .btn::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    opacity: 0.5;
+  }
+
+  /* hover 时的光泽扫过 */
+  .btn::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 80%;
+    height: 100%;
+    background: linear-gradient(100deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.10) 50%,
+      transparent 100%
+    );
+    transform: skewX(-18deg);
+    transition: left 0.7s var(--ease-out-expo);
+    pointer-events: none;
+  }
+
+  .btn:hover::after {
+    left: 130%;
+  }
+
+  .btn:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: var(--glass-border-strong);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-float);
+  }
+
+  .btn:active {
+    transform: translateY(0) scale(0.98);
+    transition-duration: 0.1s;
+  }
+
+  .btn svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 1.8;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--text-3);
+  }
+
+  .btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-1);
+  }
+
+  .divider {
+    width: 1px;
+    height: 22px;
+    background: linear-gradient(180deg, transparent, var(--glass-border-strong), transparent);
+    margin: 0 4px;
+  }
+
+  .stats {
+    display: flex;
+    gap: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--text-3);
+  }
+
+  .stats span b {
+    color: var(--text-1);
+    font-weight: 500;
+    margin-left: 4px;
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.08);
+  }
+
+  /* ============ Toast ============ */
+  .toast-container {
+    position: fixed;
+    bottom: 110px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: rgba(12, 12, 16, 0.94);
+    backdrop-filter: blur(48px) saturate(200%);
+    -webkit-backdrop-filter: blur(48px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 14px;
+    box-shadow: var(--shadow-deep), 0 0 40px -10px rgba(110, 168, 255, 0.08);
+    color: var(--text-1);
+    font-size: 13px;
+    font-weight: 400;
+    opacity: 0;
+    transform: translateY(24px) scale(0.92);
+    transition: all 0.4s var(--ease-spring);
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .toast-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(40, 200, 64, 0.15);
+    color: #4ade80;
+    flex-shrink: 0;
+    box-shadow: 0 0 12px rgba(40, 200, 64, 0.15);
+  }
+
+  .toast.error .toast-icon {
+    background: rgba(255, 95, 87, 0.15);
+    color: #ff5f57;
+    box-shadow: 0 0 12px rgba(255, 95, 87, 0.15);
+  }
+
+  .toast svg { width: 13px; height: 13px; stroke-width: 2.5; }
+
+  /* ============ 响应式 ============ */
+  @media (max-width: 1100px) {
+    .workspace { grid-template-columns: 1fr; gap: 18px; }
+    .workspace::before { display: none; }
+    .app { height: auto; min-height: 100vh; overflow: visible; }
+    html, body { overflow: auto; }
+    .panel { min-height: 360px; }
+  }
+
+  @media (max-width: 860px) {
+    .topbar { flex-direction: column; align-items: stretch; gap: 14px; }
+    .topbar-controls { align-items: stretch; }
+    .preview-meta .lang-select { width: 140px; }
+  }
+
+  @media (max-width: 640px) {
+    .app { padding: 14px; gap: 12px; }
+    .theme-switcher { grid-template-columns: repeat(6, 1fr); }
+    .theme-chip .chip-label { display: none; }
+    .theme-chip { padding: 7px; }
+    .theme-chip .swatch { width: 16px; height: 16px; }
+    .actionbar { flex-direction: column; align-items: stretch; }
+    .action-group { flex-wrap: wrap; justify-content: center; }
+    .stats { justify-content: center; }
+    .btn { padding: 9px 13px; font-size: 12.5px; }
+  }
+
+  @media (max-width: 480px) {
+    .theme-switcher { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  /* 加载动画 */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(16px) scale(0.98); filter: blur(4px); }
+    to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+
+  .topbar { animation: fade-up 0.7s var(--ease-out-expo) 0s both; }
+  .workspace { animation: fade-up 0.7s var(--ease-out-expo) 0.08s both; }
+  .actionbar { animation: fade-up 0.7s var(--ease-out-expo) 0.16s both; }
+
+  /* 焦点态 */
+  .btn:focus-visible,
+  .lang-trigger:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(110, 168, 255, 0.15);
+  }
+</style>
+</head>
+<body>
+
+<div class="aurora">
+  <div class="layer-2"></div>
+  <div class="layer-3"></div>
+</div>
+
+<div class="app">
+
+  <!-- 顶部栏 -->
+  <header class="topbar">
+    <div class="spotlight"></div>
+    <div class="brand">
+      <div class="brand-title" data-text="Code Highlight Studio">
+        <span class="word-sm">Code</span>
+        <span class="word-lg">Highlight</span>
+        <span class="word-sm">Studio</span>
+      </div>
+      <div class="avatar-frame">
+        <img class="brand-avatar" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAAF+UlEQVR4nFWUyW9cdx3Av7/lvTfzZt6sHu+u7TpO7SbTxG6iNg5qyy4kRFFVOBTacCiCHqASgktBSEgsBw4VEhI5hAMFWhBUpCUSOJBEzkYckrquG2+JHTue8Wye55l5+3u/hUMPwOcf+Bw+0gdVGh8gqSOEBQgVxxFFWIJCAAAABAKdgZQIkIT/QSgId0or3/vOtys++t2776RIFiOEKKVCCJWqCvWp5Bg455xjwRkGEBQQgID/p+ObTBU1l772w58YShKIoEQQLl2iaP/VIaESVXAmNUVwwqkQEcOYIoSwBCkjKlhp+86Z378ZgnNk6igjiEiBEQIEBEkswggAAAVBQJgUHBCTIEggQxeQYIhLiRyASIbN5trs7Cymibf/co4SpAjAXFIOUiIKnBMQgiscYSPB/XqDO7X5v5+LOs38YD6Z73EDO5vu7X/qM6qSbvqsXvEH+tOANS5AAQAAVN27A5IIrOigYS1cOP8Hw97f3Vr3bN40ra6uXKq34HsiO5ihKqK2lxo79PpvzhaPHfv6qVOLt9+bnP4sURAAoEZzRXASEV+3UGPlnN2puvuuSujW6r2qaRrxDNZpJt+lZ9PZdOJvV+ZPHp3O6Or9XX9u8QLQ7E9/8Seq6yAkBi4k+NbK4ub5X5Yrm+fnlqx2VCs1JNXSmS5d0zzPqVTbN97feO67v0rq+bfPzXe4M9KrDwxNvvb6G0SnHyWigH0Vx82ly9VK05Xs8Eh/a6+1b/u/vjAvAvmJE49+4eShS1dvvjG//vNXX0zpsScnxrZ2y4HGZ6YPxjRDClUSQAhQo7G4ff2vd28txHGib7hw/Vbp+6f/uL152dASP3jl1Mvf/IorQyxps2MzryECBStK8cCJUMX1tcXJL36Dkawak1hi9Ocffw3Jth+ppXI1Z2SbzZ2h4fzGqnf8xMGpmZNV7Lkd/crlG3VGa+XWqy983nfd3kPjiKuVxtbqzbmXXvlZhDSFYhqqZOfBvtmSSYruN0zHk4YNRyb7hqYOV9z9M29du3RjIYh8zLVOx579x4Xl2zeXluYeHhgtGP3lXLcVmbqekzJG81piqcF2ap4nXSOTH8hr6aGBhw4V7240/rW8/dbF68JmGENAIx6PZDtotdrjBw5fuXJtoL+rf3i84zqqmlIJ4FK1gvq7XvrWyy+8+HwCR0+eOPnQ8AFPqOPHjt9cWIvckHHPj0LFl0YYHxzqPf3b0+VKfWHpA8uPfKbkVAWBAABaMVueTKNMr4BY3+HH72y1zdX64xPjaZEYHXt4u+ZZdjPkgkhpB55o8XLJWdsxC8OjK+t3Dx4YsiOSAgAA7ARsYHQkJuMKT+a6RhgtaCjpu+TW4p1CbkhIxkKfRxBFEjBHLLZV3r46f81xWanWvH37/XgsoSgaAODB4UeMXF+1Vt+8V97rgIOMqh3uWC3A6QdmJ9bbjVRDE0gBJU40j+JqqVyvmUY8l87Fu/LdCCEQEgDw9NNPtEvVuhmYATYDeeHqreX1ChOJzXLNtVTSwdJnWEOJVDIMUZwJPZlKZdLN0kaKwfNfejae0CUCAMBjE4/aTnPPqTa8vcp+a2RkojA8fvbsu1bH5thl3FPSMSeKmlabUIQxTmXSmZQBVCrM+ve1iwhiH20Py1ANOJ67eAkjFWMsk1o7JMOPPdXusBgxGFOFUFU1FsdqoatHTacmilOhb4b2g83qPbBMx7cQIgBAt3fNnZ3taqXiRfOKnk31ZBIJI5BCGqlYNnt0ZsZj3s7yewkjHVdlsVjc3b1vtarZwR7LcRzHYogJyQhoaPr4Y5YbsQA7vsQKJI3M1MzTPuMyHhNM+rZDmIylNFCCZrkadZq9xM/nlC8/9ywPnaniJGTH1MIAihiNUp9K5NXuPjWqtzaqq0ITH658mM4OxDOSSAUoIonEXuTqDEWduh96PK9//JOfCwLysWc+vb66zHf+eeSZrzKMsc25w8LZMz+S+dx4caZv+Am9ZzxndHtuFLAo8Lx2sxXYrmWbgNPufrR2v/Hm2UuDo4+YrYAhzWEKs/ZYFPwH2K5N160C9sQAAAAASUVORK5CYII=" alt="Shiba" />
+      </div>
+    </div>
+
+    <div class="topbar-controls">
+      <div class="theme-switcher" id="themeSwitcher" role="tablist" aria-label="高亮主题">
+        <button class="theme-chip" data-theme="lumen" title="Lumen · 液态玻璃">
+          <span class="swatch" style="background:linear-gradient(135deg,#7eb6ff,#a5d6a7);"></span>
+          <span class="chip-label">Lumen</span>
+        </button>
+        <button class="theme-chip" data-theme="aurora" title="Aurora · 极光">
+          <span class="swatch" style="background:linear-gradient(135deg,#00d4ff,#5eead4);"></span>
+          <span class="chip-label">Aurora</span>
+        </button>
+        <button class="theme-chip" data-theme="synthwave" title="Synthwave · 合成波">
+          <span class="swatch" style="background:linear-gradient(135deg,#ff7edb,#c792ea);"></span>
+          <span class="chip-label">Synthwave</span>
+        </button>
+        <button class="theme-chip" data-theme="ember" title="Ember · 余烬">
+          <span class="swatch" style="background:linear-gradient(135deg,#ff7847,#ffb86b);"></span>
+          <span class="chip-label">Ember</span>
+        </button>
+        <button class="theme-chip" data-theme="forest" title="Forest · 森林">
+          <span class="swatch" style="background:linear-gradient(135deg,#81c784,#c5e1a5);"></span>
+          <span class="chip-label">Forest</span>
+        </button>
+        <button class="theme-chip" data-theme="tokyo" title="Tokyo Night · 东京夜">
+          <span class="swatch" style="background:linear-gradient(135deg,#7aa2f7,#9ece6a);"></span>
+          <span class="chip-label">Tokyo</span>
+        </button>
+        <button class="theme-chip" data-theme="dracula" title="Dracula · 吸血鬼">
+          <span class="swatch" style="background:linear-gradient(135deg,#ff79c6,#bd93f9);"></span>
+          <span class="chip-label">Dracula</span>
+        </button>
+        <button class="theme-chip" data-theme="nordic" title="Nordic · 北欧">
+          <span class="swatch" style="background:linear-gradient(135deg,#81a1c1,#88c0d0);"></span>
+          <span class="chip-label">Nordic</span>
+        </button>
+        <button class="theme-chip" data-theme="solar" title="Solarized · 日光暗">
+          <span class="swatch" style="background:linear-gradient(135deg,#268bd2,#2aa198);"></span>
+          <span class="chip-label">Solar</span>
+        </button>
+        <button class="theme-chip" data-theme="cyber" title="Cyberpunk · 赛博朋克">
+          <span class="swatch" style="background:linear-gradient(135deg,#ff00ff,#ffff00);"></span>
+          <span class="chip-label">Cyber</span>
+        </button>
+        <button class="theme-chip" data-theme="rosepine" title="Rose Pine · 玫瑰松">
+          <span class="swatch" style="background:linear-gradient(135deg,#ebbcba,#c4a7e7);"></span>
+          <span class="chip-label">Rosé</span>
+        </button>
+        <button class="theme-chip" data-theme="mono" title="Mono · 极简灰阶">
+          <span class="swatch" style="background:linear-gradient(135deg,#ffffff,#8888a0);"></span>
+          <span class="chip-label">Mono</span>
+        </button>
+        <button class="theme-chip" data-theme="gruvbox" title="Gruvbox · 暖色复古">
+          <span class="swatch" style="background:linear-gradient(135deg,#fb4934,#fabd2f);"></span>
+          <span class="chip-label">Gruvbox</span>
+        </button>
+        <button class="theme-chip" data-theme="onedark" title="One Dark · Atom">
+          <span class="swatch" style="background:linear-gradient(135deg,#61afef,#98c379);"></span>
+          <span class="chip-label">One Dark</span>
+        </button>
+        <button class="theme-chip" data-theme="monokai" title="Monokai · 经典">
+          <span class="swatch" style="background:linear-gradient(135deg,#f92672,#a6e22e);"></span>
+          <span class="chip-label">Monokai</span>
+        </button>
+        <button class="theme-chip" data-theme="material" title="Material · 清爽蓝绿">
+          <span class="swatch" style="background:linear-gradient(135deg,#82aaff,#c3e88d);"></span>
+          <span class="chip-label">Material</span>
+        </button>
+        <button class="theme-chip" data-theme="catppuccin" title="Catppuccin · 柔和薰衣草">
+          <span class="swatch" style="background:linear-gradient(135deg,#cba6f7,#a6e3a1);"></span>
+          <span class="chip-label">Catppuccin</span>
+        </button>
+        <button class="theme-chip" data-theme="github" title="GitHub · 经典蓝灰">
+          <span class="swatch" style="background:linear-gradient(135deg,#79b8ff,#85e89d);"></span>
+          <span class="chip-label">GitHub</span>
+        </button>
+        <button class="theme-chip" data-theme="horizon" title="Horizon · 日落暖橘">
+          <span class="swatch" style="background:linear-gradient(135deg,#E95678,#FADAD1);"></span>
+          <span class="chip-label">Horizon</span>
+        </button>
+        <button class="theme-chip" data-theme="nightowl" title="Night Owl · 暗夜猫头鹰">
+          <span class="swatch" style="background:linear-gradient(135deg,#c792ea,#82AAFF);"></span>
+          <span class="chip-label">Night Owl</span>
+        </button>
+        <button class="theme-chip" data-theme="ayu" title="Ayu Dark · 暗金">
+          <span class="swatch" style="background:linear-gradient(135deg,#FFB454,#BAE67E);"></span>
+          <span class="chip-label">Ayu</span>
+        </button>
+        <button class="theme-chip" data-theme="sop" title="Shades of Purple · 紫韵">
+          <span class="swatch" style="background:linear-gradient(135deg,#FF9D00,#A5FF90);"></span>
+          <span class="chip-label">Purple</span>
+        </button>
+        <button class="theme-chip" data-theme="palenight" title="Palenight · 淡紫夜">
+          <span class="swatch" style="background:linear-gradient(135deg,#C792EA,#82AAFF);"></span>
+          <span class="chip-label">Palenight</span>
+        </button>
+        <button class="theme-chip" data-theme="vitesse" title="Vitesse · 极速暗夜">
+          <span class="swatch" style="background:linear-gradient(135deg,#CB7676,#80A665);"></span>
+          <span class="chip-label">Vitesse</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 工作区 -->
+  <main class="workspace">
+
+    <!-- 编辑器面板 -->
+    <section class="panel" aria-label="代码编辑器">
+      <div class="spotlight"></div>
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-dots"><span></span><span></span><span></span></div>
+          <span>Editor</span>
+        </div>
+        <div class="panel-meta" id="editorMeta">就绪</div>
+      </div>
+      <div class="editor-wrap">
+        <div class="editor-gutter" id="editorGutter"></div>
+        <textarea
+          class="editor-input"
+          id="editor"
+          spellcheck="false"
+          placeholder="// 在此粘贴或编写代码，右侧实时呈现高亮预览..."
+          aria-label="代码输入区"
+        ></textarea>
+      </div>
+    </section>
+
+    <!-- 预览面板 -->
+    <section class="panel panel-preview" aria-label="高亮预览">
+      <div class="spotlight"></div>
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-dots"><span></span><span></span><span></span></div>
+          <span>Preview</span>
+        </div>
+        <div class="panel-meta preview-meta">
+          <div class="lang-select" id="langSelect">
+            <button class="lang-trigger" id="langTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+              <span class="lang-current">
+                <span class="lang-dot"></span>
+                <span id="langLabel">JavaScript</span>
+              </span>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="lang-menu" id="langMenu" role="listbox"></div>
+          </div>
+        </div>
+      </div>
+      <div class="preview-wrap" id="previewWrap">
+        <div class="preview-inner">
+          <div class="preview-gutter" id="previewGutter"></div>
+          <div class="preview-code"><pre><code id="preview" class="hljs"></code></pre></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 操作栏 -->
+  <footer class="actionbar">
+    <div class="spotlight"></div>
+    <div class="action-group">
+      <button class="btn" id="btnDownload" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        导出 Word
+      </button>
+    </div>
+
+    <div class="action-group">
+      <div class="stats">
+        <span>行数<b id="statLines">0</b></span>
+        <span>字符<b id="statChars">0</b></span>
+      </div>
+      <div class="divider"></div>
+      <button class="btn btn-ghost" id="btnSample" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        示例
+      </button>
+      <button class="btn btn-ghost" id="btnClear" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        清空
+      </button>
+    </div>
+  </footer>
+
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* ============================================================
+   Lumen · 代码高亮工坊
+   ============================================================ */
+
+// 支持的语言列表
+const LANGUAGES = [
+  { name: 'JavaScript',   value: 'javascript', ext: '.js'   },
+  { name: 'TypeScript',   value: 'typescript', ext: '.ts'   },
+  { name: 'Python',       value: 'python',     ext: '.py'   },
+  { name: 'Java',         value: 'java',       ext: '.java' },
+  { name: 'C',            value: 'c',          ext: '.c'    },
+  { name: 'C++',          value: 'cpp',        ext: '.cpp'  },
+  { name: 'C#',           value: 'csharp',     ext: '.cs'   },
+  { name: 'Go',           value: 'go',         ext: '.go'   },
+  { name: 'Rust',         value: 'rust',       ext: '.rs'   },
+  { name: 'Ruby',         value: 'ruby',       ext: '.rb'   },
+  { name: 'PHP',          value: 'php',        ext: '.php'  },
+  { name: 'Swift',        value: 'swift',      ext: '.swift'},
+  { name: 'Kotlin',       value: 'kotlin',     ext: '.kt'   },
+  { name: 'HTML / XML',   value: 'xml',        ext: '.html' },
+  { name: 'CSS',          value: 'css',        ext: '.css'  },
+  { name: 'JSON',         value: 'json',       ext: '.json' },
+  { name: 'YAML',         value: 'yaml',       ext: '.yml'  },
+  { name: 'Markdown',     value: 'markdown',   ext: '.md'   },
+  { name: 'SQL',          value: 'sql',        ext: '.sql'  },
+  { name: 'Bash / Shell', value: 'bash',       ext: '.sh'   },
+  { name: 'Dart',         value: 'dart',       ext: '.dart' },
+  { name: 'Lua',          value: 'lua',        ext: '.lua'  },
+  { name: 'Scala',        value: 'scala',      ext: '.scala'},
+  { name: 'R',            value: 'r',          ext: '.r'    },
+  { name: 'MATLAB',       value: 'matlab',     ext: '.m'    },
+  { name: 'Julia',        value: 'julia',      ext: '.jl'   },
+  { name: 'Haskell',      value: 'haskell',    ext: '.hs'   },
+  { name: 'Perl',         value: 'perl',       ext: '.pl'   },
+  { name: 'Objective-C',  value: 'objectivec', ext: '.m'    },
+  { name: 'F#',           value: 'fsharp',     ext: '.fs'   },
+  { name: 'Groovy',       value: 'groovy',     ext: '.groovy'},
+  { name: 'PowerShell',   value: 'powershell', ext: '.ps1'  },
+  { name: 'Dockerfile',   value: 'dockerfile', ext: 'Dockerfile'},
+  { name: 'Plain Text',   value: 'plaintext',  ext: '.txt'  },
+];
+
+// 示例代码集
+const SAMPLES = {
+  javascript: `// 计算斐波那契数列的前 N 项
+function fibonacci(n) {
+  const sequence = [0, 1];
+  for (let i = 2; i < n; i++) {
+    sequence.push(sequence[i - 1] + sequence[i - 2]);
+  }
+  return sequence.slice(0, n);
+}
+
+// 异步获取数据并处理
+async function fetchUsers(endpoint) {
+  try {
+    const response = await fetch(\`\${endpoint}/users\`);
+    if (!response.ok) throw new Error("网络错误");
+    const users = await response.json();
+    return users.filter(u => u.active);
+  } catch (err) {
+    console.error("获取用户失败:", err.message);
+    return [];
+  }
+}
+
+const fib = fibonacci(10);
+console.log("Fibonacci:", fib);`,
+
+  typescript: `// 泛型工具：深拷贝
+type DeepCloneable = object | unknown[];
+
+function deepClone<T extends DeepCloneable>(source: T): T {
+  if (source === null || typeof source !== "object") {
+    return source;
+  }
+  const clone = Array.isArray(source) ? [] : {};
+  for (const key in source) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      clone[key] = deepClone(source[key]);
+    }
+  }
+  return clone as T;
+}
+
+interface User {
+  id: number;
+  name: string;
+  roles: ("admin" | "editor" | "viewer")[];
+}
+
+const original: User = { id: 1, name: "Alice", roles: ["admin"] };
+const copy = deepClone(original);`,
+
+  python: `"""简易任务调度器"""
+from dataclasses import dataclass, field
+from typing import Callable, List
+import heapq
+import time
+
+
+@dataclass(order=True)
+class Task:
+    priority: int
+    name: str = field(compare=False)
+    handler: Callable = field(compare=False, default=lambda: None)
+
+
+class Scheduler:
+    def __init__(self):
+        self._queue: List[Task] = []
+
+    def add(self, task: Task):
+        heapq.heappush(self._queue, task)
+
+    def run(self):
+        while self._queue:
+            task = heapq.heappop(self._queue)
+            print(f"[run] {task.name} (priority={task.priority})")
+            task.handler()
+
+
+if __name__ == "__main__":
+    s = Scheduler()
+    s.add(Task(3, "low", lambda: print("low done")))
+    s.add(Task(1, "high", lambda: print("high done")))
+    s.run()`,
+
+  java: `// 简易线程池示例
+import java.util.concurrent.*;
+import java.util.*;
+
+public class TaskRunner {
+    private final ExecutorService pool;
+
+    public TaskRunner(int size) {
+        this.pool = Executors.newFixedThreadPool(size);
+    }
+
+    public Future<Integer> submit(Callable<Integer> task) {
+        return pool.submit(task);
+    }
+
+    public static void main(String[] args) throws Exception {
+        TaskRunner runner = new TaskRunner(4);
+        List<Future<Integer>> futures = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            final int n = i;
+            futures.add(runner.submit(() -> n * n));
+        }
+
+        int sum = 0;
+        for (Future<Integer> f : futures) sum += f.get();
+        System.out.println("Sum of squares: " + sum);
+    }
+}`,
+
+  cpp: `#include <iostream>
+#include <vector>
+#include <algorithm>
+
+// 快速排序
+template <typename T>
+void quickSort(std::vector<T>& arr, int lo, int hi) {
+    if (lo >= hi) return;
+    T pivot = arr[hi];
+    int i = lo - 1;
+    for (int j = lo; j < hi; ++j) {
+        if (arr[j] < pivot) {
+            std::swap(arr[++i], arr[j]);
+        }
+    }
+    std::swap(arr[i + 1], arr[hi]);
+    quickSort(arr, lo, i);
+    quickSort(arr, i + 2, hi);
+}
+
+int main() {
+    std::vector<int> nums = {5, 2, 9, 1, 7, 3};
+    quickSort(nums, 0, nums.size() - 1);
+    for (int n : nums) std::cout << n << " ";
+    return 0;
+}`,
+
+  go: `package main
+
+import (
+\t"fmt"
+\t"sync"
+\t"time"
+)
+
+// 并发拉取多个 URL
+func fetch(url string, wg *sync.WaitGroup, results chan<- string) {
+\tdefer wg.Done()
+\ttime.Sleep(100 * time.Millisecond) // 模拟请求
+\tresults <- fmt.Sprintf("fetched: %s", url)
+}
+
+func main() {
+\turls := []string{
+\t\t"https://api.example.com/a",
+\t\t"https://api.example.com/b",
+\t\t"https://api.example.com/c",
+\t}
+
+\tvar wg sync.WaitGroup
+\tresults := make(chan string, len(urls))
+
+\tfor _, u := range urls {
+\t\twg.Add(1)
+\t\tgo fetch(u, &wg, results)
+\t}
+
+\twg.Wait()
+\tclose(results)
+
+\tfor r := range results {
+\t\tfmt.Println(r)
+\t}
+}`,
+
+  rust: `use std::collections::HashMap;
+
+fn main() {
+    // 统计单词频率
+    let text = "the quick brown fox jumps over the lazy dog the end";
+    let mut freq: HashMap<&str, u32> = HashMap::new();
+
+    for word in text.split_whitespace() {
+        *freq.entry(word).or_insert(0) += 1;
+    }
+
+    let mut sorted: Vec<_> = freq.iter().collect();
+    sorted.sort_by(|a, b| b.1.cmp(a.1));
+
+    for (word, count) in sorted {
+        println!("{:>10}: {}", word, count);
+    }
+}`,
+
+  html: `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>欢迎页</title>
+  <style>
+    body { font-family: sans-serif; background: #0a0a0d; color: #fff; }
+    .card { padding: 24px; border-radius: 16px; background: #1a1a22; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>你好，世界</h1>
+    <p>这是一个 HTML 示例文档。</p>
+    <button onclick="alert('clicked')">点击</button>
+  </div>
+</body>
+</html>`,
+
+  css: `/* 玻璃拟态卡片样式 */
+.glass-card {
+  position: relative;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 30px 80px -20px rgba(0, 0, 0, 0.8);
+  transition: transform 0.3s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-4px);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}`,
+
+  json: `{
+  "project": "Lumen",
+  "version": "1.0.0",
+  "description": "代码高亮工坊",
+  "features": [
+    "实时高亮预览",
+    "复制到 Word",
+    "多语言支持",
+    "液态玻璃主题"
+  ],
+  "author": {
+    "name": "Lumen Team",
+    "email": "hello@lumen.dev"
+  },
+  "active": true,
+  "stars": 1024
+}`,
+
+  sql: `-- 查询每位用户的订单总数与总金额
+SELECT
+    u.id           AS user_id,
+    u.name         AS user_name,
+    COUNT(o.id)    AS order_count,
+    SUM(o.amount)  AS total_amount
+FROM users u
+LEFT JOIN orders o ON o.user_id = u.id
+WHERE u.created_at >= '2024-01-01'
+GROUP BY u.id, u.name
+HAVING SUM(o.amount) > 1000
+ORDER BY total_amount DESC
+LIMIT 20;`,
+
+  bash: `#!/usr/bin/env bash
+# 批量压缩当前目录下的日志文件
+set -euo pipefail
+
+LOG_DIR="\${1:-./logs}"
+ARCHIVE="logs-$(date +%Y%m%d).tar.gz"
+
+if [[ ! -d "$LOG_DIR" ]]; then
+  echo "目录不存在: $LOG_DIR" >&2
+  exit 1
+fi
+
+echo "正在压缩 $LOG_DIR ..."
+tar -czf "$ARCHIVE" "$LOG_DIR"/*.log
+echo "完成: $ARCHIVE"`,
+
+  r: `# 线性回归与分组统计
+data(mtcars)
+model <- lm(mpg ~ wt + hp + cyl, data = mtcars)
+summary(model)
+
+# 预测新数据
+new_data <- data.frame(wt = 3.0, hp = 150, cyl = 6)
+pred <- predict(model, newdata = new_data, interval = "confidence")
+cat(sprintf("预测 MPG: %.2f [%.2f, %.2f]\\n",
+            pred[1], pred[2], pred[3]))
+
+# 按气缸数分组统计
+library(dplyr)
+mtcars %>%
+  group_by(cyl) %>%
+  summarise(avg_mpg = mean(mpg), count = n()) %>%
+  print()`,
+
+  matlab: `% 信号处理：低通巴特沃斯滤波器设计
+fs = 1000;              % 采样频率 (Hz)
+t  = 0 : 1/fs : 1;
+x  = sin(2*pi*50*t) + 0.5*sin(2*pi*200*t) + 0.3*randn(size(t));
+
+% 设计 4 阶巴特沃斯低通滤波器（截止 80 Hz）
+[b, a] = butter(4, 80/(fs/2), 'low');
+y = filter(b, a, x);
+
+% 计算功率谱密度
+[pxx, f] = pwelch(y, hamming(256), 128, 512, fs);
+
+fprintf('原始信号功率: %.4f\\n', mean(x.^2));
+fprintf('滤波后功率:   %.4f\\n', mean(y.^2));`,
+
+  julia: `"""
+蒙特卡罗法估算 π 值（多线程并行版本）
+"""
+function estimate_pi(n::Int; nthreads::Int=Threads.nthreads())
+    counts = zeros(Int, nthreads)
+    Threads.@threads for tid in 1:nthreads
+        chunk = n ÷ nthreads
+        c = 0
+        for _ in 1:chunk
+            x, y = rand(), rand()
+            if x^2 + y^2 ≤ 1
+                c += 1
+            end
+        end
+        counts[tid] = c
+    end
+    return 4 * sum(counts) / n
+end
+
+for n in [10^5, 10^6, 10^7]
+    π_est = estimate_pi(n)
+    println("n=\$n  π≈\$π_est  误差=\$(abs(π_est - π))")
+end`,
+
+  haskell: `module Main where
+
+import Data.List (sort, nub)
+
+-- 筛法求素数
+primes :: [Int]
+primes = sieve [2..]
+  where sieve (p:xs) = p : sieve [x | x <- xs, x \`mod\` p /= 0]
+
+-- N 皇后问题
+queens :: Int -> [[Int]]
+queens n = solve n
+  where
+    solve 0 = [[]]
+    solve k = [ q : qs
+              | qs <- solve (k - 1)
+              , q  <- [1..n]
+              , safe q qs ]
+    safe q qs = q \`notElem\` qs
+             && and [abs (q - qi) /= i | (qi, i) <- zip qs [1..]]
+
+main :: IO ()
+main = do
+  let sols = queens 8
+  putStrLn $ "8 皇后解法数: " ++ show (length sols)
+  putStrLn $ "前 20 个素数: " ++ show (take 20 primes)`,
+
+  perl: `#!/usr/bin/perl
+use strict;
+use warnings;
+
+# 统计文件中每个单词出现频率
+my %freq;
+while (my $line = <STDIN>) {
+    chomp $line;
+    for my $word (split /\\W+/, lc $line) {
+        $freq{$word}++ if $word;
+    }
+}
+
+# 按频率降序输出 Top 15
+my $rank = 0;
+for my $w (sort { $freq{$b} <=> $freq{$a} } keys %freq) {
+    last if ++$rank > 15;
+    printf "%2d. %-20s %d\\n", $rank, $w, $freq{$w};
+}`,
+
+  objectivec: `#import <Foundation/Foundation.h>
+
+@interface Stack<__covariant T> : NSObject
+@property (nonatomic, readonly) NSUInteger count;
+- (void)push:(T)item;
+- (T)pop;
+- (T)peek;
+@end
+
+@implementation Stack {
+    NSMutableArray *_storage;
+}
+
+- (instancetype)init {
+    self = [super init];
+    if (self) _storage = [NSMutableArray new];
+    return self;
+}
+
+- (NSUInteger)count { return _storage.count; }
+- (void)push:(id)item { [_storage addObject:item]; }
+- (id)pop {
+    id last = _storage.lastObject;
+    if (last) [_storage removeLastObject];
+    return last;
+}
+- (id)peek { return _storage.lastObject; }
+
+@end
+
+int main(int argc, const char *argv[]) {
+    @autoreleasepool {
+        Stack<NSString *> *s = [Stack new];
+        [s push:@"Hello"];
+        [s push:@"World"];
+        NSLog(@"peek: %@", [s peek]);
+        NSLog(@"pop:  %@", [s pop]);
+    }
+    return 0;
+}`,
+
+  fsharp: `open System
+
+// 尾递归斐波那契（BigInt 版）
+let fib (n: int) : bigint =
+    let rec loop i a b =
+        if i <= 0 then a
+        else loop (i - 1) b (a + b)
+    loop n 0I 1I
+
+// 列表处理管道
+let processList (items: int list) =
+    items
+    |> List.filter (fun x -> x % 2 = 0)
+    |> List.map (fun x -> x * x)
+    |> List.fold (+) 0
+
+// 记录类型与模式匹配
+type Shape =
+    | Circle    of radius: float
+    | Rectangle of width: float * height: float
+
+let area = function
+    | Circle r        -> Math.PI * r * r
+    | Rectangle(w, h) -> w * h
+
+[<EntryPoint>]
+let main _ =
+    printfn "fib(100) = %A" (fib 100)
+    printfn "sum of squares of evens = %d" (processList [1..20])
+    printfn "circle area = %.2f" (area (Circle 5.0))
+    0`,
+
+  groovy: `// REST API 客户端封装
+import groovy.json.JsonSlurper
+import groovy.transform.CompileStatic
+
+@CompileStatic
+class ApiClient {
+    String baseUrl
+    Map<String, String> headers = [:]
+
+    ApiClient(String baseUrl) {
+        this.baseUrl = baseUrl
+        headers['Accept'] = 'application/json'
+    }
+
+    def get(String path) {
+        def conn = new URL("\${baseUrl}\${path}").openConnection()
+        headers.each { k, v -> conn.setRequestProperty(k, v) }
+        new JsonSlurper().parseText(conn.inputStream.text)
+    }
+}
+
+// 使用示例
+def client = new ApiClient('https://api.github.com')
+def repo = client.get('/repos/apache/groovy')
+println "⭐ \${repo.stargazers_count}  🍴 \${repo.forks_count}"`,
+
+  powershell: `# 批量清理超过 30 天的日志并生成报告
+param(
+    [string]$LogPath  = "C:\\Logs",
+    [int]$MaxAgeDays  = 30,
+    [string]$Ext      = "*.log"
+)
+
+$cutoff   = (Get-Date).AddDays(-$MaxAgeDays)
+$files    = Get-ChildItem -Path $LogPath -Filter $Ext -Recurse |
+            Where-Object { $_.LastWriteTime -lt $cutoff }
+$totalMB  = ($files | Measure-Object -Property Length -Sum).Sum / 1MB
+
+Write-Host "发现 $($files.Count) 个过期日志（共 $([math]::Round($totalMB,2)) MB）"
+
+$files | ForEach-Object {
+    Remove-Item $_.FullName -Force
+    Write-Verbose "已删除: $($_.Name)"
+}
+
+Write-Host "清理完成" -ForegroundColor Green`,
+
+  dockerfile: `FROM python:3.12-slim AS builder
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+COPY src/ ./src/
+
+# ---------- 运行阶段 ----------
+FROM gcr.io/distroless/python3-debian12
+
+WORKDIR /app
+COPY --from=builder /install /usr/local
+COPY --from=builder /app/src ./src
+
+ENV APP_ENV=production
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+CMD ["python", "src/main.py"]`,
+};
+
+// DOM 引用
+const editor          = document.getElementById('editor');
+const editorGutter    = document.getElementById('editorGutter');
+const preview         = document.getElementById('preview');
+const previewCode     = document.querySelector('.preview-code');
+const previewGutter   = document.getElementById('previewGutter');
+const previewWrap     = document.getElementById('previewWrap');
+const langSelect      = document.getElementById('langSelect');
+const langTrigger     = document.getElementById('langTrigger');
+const langMenu        = document.getElementById('langMenu');
+const langLabel       = document.getElementById('langLabel');
+const editorMeta      = document.getElementById('editorMeta');
+const statLines       = document.getElementById('statLines');
+const statChars       = document.getElementById('statChars');
+const toastContainer  = document.getElementById('toastContainer');
+const themeSwitcher   = document.getElementById('themeSwitcher');
+
+let currentLang = 'javascript';
+let currentTheme = 'lumen';
+
+// 已动态加载的语言包记录，避免重复加载
+const loadedLangs = new Set();
+// 正在加载中的语言包 Promise
+const loadingLangs = new Map();
+
+// 内置在 highlight.min.js 中的常用语言（无需动态加载）
+const BUILTIN_LANGS = new Set([
+  'javascript', 'typescript', 'python', 'java', 'c', 'cpp', 'csharp', 'go',
+  'rust', 'ruby', 'php', 'swift', 'kotlin', 'xml', 'css', 'json', 'yaml',
+  'markdown', 'sql', 'bash', 'shell', 'plaintext', 'dart', 'lua', 'scala',
+  'r', 'matlab', 'julia', 'haskell', 'perl', 'objectivec', 'fsharp', 'groovy',
+  'powershell', 'dockerfile', 'diff'
+]);
+
+// 主题色映射表 —— Word 导出时使用（与 CSS 中各主题保持一致）
+const THEME_COLOR_MAPS = {
+  lumen: {
+    'hljs': '#e4e4e7', 'hljs-comment': '#5a5a63', 'hljs-quote': '#5a5a63',
+    'hljs-keyword': '#7eb6ff', 'hljs-selector-tag': '#7eb6ff', 'hljs-built_in': '#7eb6ff',
+    'hljs-string': '#a5d6a7', 'hljs-attr': '#a5d6a7',
+    'hljs-number': '#f0b67f', 'hljs-literal': '#f0b67f',
+    'hljs-title': '#ffd479', 'hljs-section': '#ffd479',
+    'hljs-type': '#f9a8d4', 'hljs-variable': '#c5cae9', 'hljs-template-variable': '#c5cae9',
+    'hljs-tag': '#90caf9', 'hljs-name': '#7eb6ff', 'hljs-attribute': '#ffd479',
+    'hljs-symbol': '#b39ddb', 'hljs-bullet': '#b39ddb', 'hljs-meta': '#b39ddb',
+    'hljs-regexp': '#f472b6', 'hljs-link': '#5ee0d0',
+    'hljs-deletion': '#ef9a9a', 'hljs-addition': '#a5d6a7', 'hljs-params': '#e4e4e7',
+  },
+  aurora: {
+    'hljs': '#d4f1f4', 'hljs-comment': '#4a6670', 'hljs-quote': '#4a6670',
+    'hljs-keyword': '#00d4ff', 'hljs-selector-tag': '#00d4ff', 'hljs-built_in': '#00d4ff',
+    'hljs-string': '#5eead4', 'hljs-attr': '#5eead4',
+    'hljs-number': '#fcd34d', 'hljs-literal': '#fcd34d',
+    'hljs-title': '#67e8f9', 'hljs-section': '#67e8f9',
+    'hljs-type': '#a5f3fc', 'hljs-variable': '#bae6fd', 'hljs-template-variable': '#bae6fd',
+    'hljs-tag': '#38bdf8', 'hljs-name': '#22d3ee', 'hljs-attribute': '#fde68a',
+    'hljs-symbol': '#7dd3fc', 'hljs-bullet': '#7dd3fc', 'hljs-meta': '#7dd3fc',
+    'hljs-regexp': '#f0abfc', 'hljs-link': '#2dd4bf',
+    'hljs-deletion': '#fda4af', 'hljs-addition': '#6ee7b7', 'hljs-params': '#d4f1f4',
+  },
+  synthwave: {
+    'hljs': '#f5e9ff', 'hljs-comment': '#6b5b8e', 'hljs-quote': '#6b5b8e',
+    'hljs-keyword': '#ff7edb', 'hljs-selector-tag': '#ff7edb', 'hljs-built_in': '#ff7edb',
+    'hljs-string': '#fede5d', 'hljs-attr': '#fede5d',
+    'hljs-number': '#ff8c42', 'hljs-literal': '#ff8c42',
+    'hljs-title': '#c792ea', 'hljs-section': '#c792ea',
+    'hljs-type': '#f99bff', 'hljs-variable': '#d6b3ff', 'hljs-template-variable': '#d6b3ff',
+    'hljs-tag': '#ff7edb', 'hljs-name': '#ff9ce6', 'hljs-attribute': '#ffd86b',
+    'hljs-symbol': '#82aaff', 'hljs-bullet': '#82aaff', 'hljs-meta': '#82aaff',
+    'hljs-regexp': '#ff6ac1', 'hljs-link': '#7af8ca',
+    'hljs-deletion': '#ff5e7e', 'hljs-addition': '#95ff95', 'hljs-params': '#f5e9ff',
+  },
+  ember: {
+    'hljs': '#fef3e8', 'hljs-comment': '#7a6655', 'hljs-quote': '#7a6655',
+    'hljs-keyword': '#ff7847', 'hljs-selector-tag': '#ff7847', 'hljs-built_in': '#ff7847',
+    'hljs-string': '#ffb86b', 'hljs-attr': '#ffb86b',
+    'hljs-number': '#f9d76c', 'hljs-literal': '#f9d76c',
+    'hljs-title': '#ff9e64', 'hljs-section': '#ff9e64',
+    'hljs-type': '#ffba87', 'hljs-variable': '#ffd9a8', 'hljs-template-variable': '#ffd9a8',
+    'hljs-tag': '#ff8e53', 'hljs-name': '#ff7847', 'hljs-attribute': '#f9d76c',
+    'hljs-symbol': '#e8a87c', 'hljs-bullet': '#e8a87c', 'hljs-meta': '#e8a87c',
+    'hljs-regexp': '#ff5e7e', 'hljs-link': '#ffd166',
+    'hljs-deletion': '#ef5350', 'hljs-addition': '#b5e48c', 'hljs-params': '#fef3e8',
+  },
+  forest: {
+    'hljs': '#e8f5e9', 'hljs-comment': '#5a7355', 'hljs-quote': '#5a7355',
+    'hljs-keyword': '#81c784', 'hljs-selector-tag': '#81c784', 'hljs-built_in': '#81c784',
+    'hljs-string': '#c5e1a5', 'hljs-attr': '#c5e1a5',
+    'hljs-number': '#ffb74d', 'hljs-literal': '#ffb74d',
+    'hljs-title': '#a5d6a7', 'hljs-section': '#a5d6a7',
+    'hljs-type': '#dce775', 'hljs-variable': '#c8e6c9', 'hljs-template-variable': '#c8e6c9',
+    'hljs-tag': '#66bb6a', 'hljs-name': '#81c784', 'hljs-attribute': '#ffd54f',
+    'hljs-symbol': '#bcaaa4', 'hljs-bullet': '#bcaaa4', 'hljs-meta': '#bcaaa4',
+    'hljs-regexp': '#f48fb1', 'hljs-link': '#80cbc4',
+    'hljs-deletion': '#ef9a9a', 'hljs-addition': '#aed581', 'hljs-params': '#e8f5e9',
+  },
+  mono: {
+    'hljs': '#e8e8eb', 'hljs-comment': '#555560', 'hljs-quote': '#555560',
+    'hljs-keyword': '#ffffff', 'hljs-selector-tag': '#ffffff', 'hljs-built_in': '#ffffff',
+    'hljs-string': '#c0c0c8', 'hljs-attr': '#c0c0c8',
+    'hljs-number': '#a8a8b0', 'hljs-literal': '#a8a8b0',
+    'hljs-title': '#f0f0f3', 'hljs-section': '#f0f0f3',
+    'hljs-type': '#d8d8de', 'hljs-variable': '#b8b8c0', 'hljs-template-variable': '#b8b8c0',
+    'hljs-tag': '#9898a0', 'hljs-name': '#ffffff', 'hljs-attribute': '#c8c8d0',
+    'hljs-symbol': '#8888a0', 'hljs-bullet': '#8888a0', 'hljs-meta': '#8888a0',
+    'hljs-regexp': '#a0a0a8', 'hljs-link': '#9898a0',
+    'hljs-deletion': '#888890', 'hljs-addition': '#d0d0d8', 'hljs-params': '#e8e8eb',
+  },
+  tokyo: {
+    'hljs': '#c0caf5', 'hljs-comment': '#565f89', 'hljs-quote': '#565f89',
+    'hljs-keyword': '#7dcfff', 'hljs-selector-tag': '#7dcfff', 'hljs-built_in': '#7dcfff',
+    'hljs-string': '#9ece6a', 'hljs-attr': '#9ece6a',
+    'hljs-number': '#ff9e64', 'hljs-literal': '#ff9e64',
+    'hljs-title': '#7aa2f7', 'hljs-section': '#7aa2f7',
+    'hljs-type': '#2ac3de', 'hljs-variable': '#e0af68', 'hljs-template-variable': '#e0af68',
+    'hljs-tag': '#89ddff', 'hljs-name': '#7dcfff', 'hljs-attribute': '#bb9af7',
+    'hljs-symbol': '#bb9af7', 'hljs-bullet': '#bb9af7', 'hljs-meta': '#bb9af7',
+    'hljs-regexp': '#f7768e', 'hljs-link': '#7dcfff',
+    'hljs-deletion': '#f7768e', 'hljs-addition': '#9ece6a', 'hljs-params': '#c0caf5',
+  },
+  dracula: {
+    'hljs': '#f8f8f2', 'hljs-comment': '#6272a4', 'hljs-quote': '#6272a4',
+    'hljs-keyword': '#ff79c6', 'hljs-selector-tag': '#ff79c6', 'hljs-built_in': '#ff79c6',
+    'hljs-string': '#f1fa8c', 'hljs-attr': '#f1fa8c',
+    'hljs-number': '#bd93f9', 'hljs-literal': '#bd93f9',
+    'hljs-title': '#50fa7b', 'hljs-section': '#50fa7b',
+    'hljs-type': '#8be9fd', 'hljs-variable': '#f8f8f2', 'hljs-template-variable': '#f8f8f2',
+    'hljs-tag': '#ff79c6', 'hljs-name': '#7ee787', 'hljs-attribute': '#50fa7b',
+    'hljs-symbol': '#bd93f9', 'hljs-bullet': '#bd93f9', 'hljs-meta': '#bd93f9',
+    'hljs-regexp': '#ffb86c', 'hljs-link': '#8be9fd',
+    'hljs-deletion': '#ff5555', 'hljs-addition': '#50fa7b', 'hljs-params': '#f8f8f2',
+  },
+  nordic: {
+    'hljs': '#d8dee9', 'hljs-comment': '#4c566a', 'hljs-quote': '#4c566a',
+    'hljs-keyword': '#81a1c1', 'hljs-selector-tag': '#81a1c1', 'hljs-built_in': '#81a1c1',
+    'hljs-string': '#a3be8c', 'hljs-attr': '#a3be8c',
+    'hljs-number': '#b48ead', 'hljs-literal': '#b48ead',
+    'hljs-title': '#88c0d0', 'hljs-section': '#88c0d0',
+    'hljs-type': '#8fbcbb', 'hljs-variable': '#d8dee9', 'hljs-template-variable': '#d8dee9',
+    'hljs-tag': '#81a1c1', 'hljs-name': '#8fbcbb', 'hljs-attribute': '#ebcb8b',
+    'hljs-symbol': '#b48ead', 'hljs-bullet': '#b48ead', 'hljs-meta': '#b48ead',
+    'hljs-regexp': '#bf616a', 'hljs-link': '#88c0d0',
+    'hljs-deletion': '#bf616a', 'hljs-addition': '#a3be8c', 'hljs-params': '#d8dee9',
+  },
+  solar: {
+    'hljs': '#93a1a1', 'hljs-comment': '#586e75', 'hljs-quote': '#586e75',
+    'hljs-keyword': '#859900', 'hljs-selector-tag': '#859900', 'hljs-built_in': '#859900',
+    'hljs-string': '#2aa198', 'hljs-attr': '#2aa198',
+    'hljs-number': '#d33682', 'hljs-literal': '#d33682',
+    'hljs-title': '#268bd2', 'hljs-section': '#268bd2',
+    'hljs-type': '#b58900', 'hljs-variable': '#cb4b16', 'hljs-template-variable': '#cb4b16',
+    'hljs-tag': '#268bd2', 'hljs-name': '#859900', 'hljs-attribute': '#b58900',
+    'hljs-symbol': '#d33682', 'hljs-bullet': '#d33682', 'hljs-meta': '#d33682',
+    'hljs-regexp': '#d30102', 'hljs-link': '#2aa198',
+    'hljs-deletion': '#dc322f', 'hljs-addition': '#859900', 'hljs-params': '#93a1a1',
+  },
+  cyber: {
+    'hljs': '#e0e0e0', 'hljs-comment': '#4a5a4a', 'hljs-quote': '#4a5a4a',
+    'hljs-keyword': '#ff00ff', 'hljs-selector-tag': '#ff00ff', 'hljs-built_in': '#ff00ff',
+    'hljs-string': '#ffff00', 'hljs-attr': '#ffff00',
+    'hljs-number': '#00ffff', 'hljs-literal': '#00ffff',
+    'hljs-title': '#00ff00', 'hljs-section': '#00ff00',
+    'hljs-type': '#ff6b00', 'hljs-variable': '#b0ffb0', 'hljs-template-variable': '#b0ffb0',
+    'hljs-tag': '#ff00ff', 'hljs-name': '#00ffaa', 'hljs-attribute': '#ffaa00',
+    'hljs-symbol': '#aa00ff', 'hljs-bullet': '#aa00ff', 'hljs-meta': '#aa00ff',
+    'hljs-regexp': '#ff0080', 'hljs-link': '#00ffff',
+    'hljs-deletion': '#ff0040', 'hljs-addition': '#00ff80', 'hljs-params': '#e0e0e0',
+  },
+  rosepine: {
+    'hljs': '#e0def4', 'hljs-comment': '#6e6a86', 'hljs-quote': '#6e6a86',
+    'hljs-keyword': '#31748f', 'hljs-selector-tag': '#31748f', 'hljs-built_in': '#31748f',
+    'hljs-string': '#ebbcba', 'hljs-attr': '#ebbcba',
+    'hljs-number': '#ebbcba', 'hljs-literal': '#ebbcba',
+    'hljs-title': '#9ccfd8', 'hljs-section': '#9ccfd8',
+    'hljs-type': '#f6c177', 'hljs-variable': '#ea9a97', 'hljs-template-variable': '#ea9a97',
+    'hljs-tag': '#31748f', 'hljs-name': '#9ccfd8', 'hljs-attribute': '#f6c177',
+    'hljs-symbol': '#c4a7e7', 'hljs-bullet': '#c4a7e7', 'hljs-meta': '#c4a7e7',
+    'hljs-regexp': '#ebbcba', 'hljs-link': '#9ccfd8',
+    'hljs-deletion': '#eb6f92', 'hljs-addition': '#9ccfd8', 'hljs-params': '#e0def4',
+  },
+  gruvbox: {
+    'hljs': '#ebdbb2', 'hljs-comment': '#928374', 'hljs-quote': '#928374',
+    'hljs-keyword': '#fb4934', 'hljs-selector-tag': '#fb4934', 'hljs-built_in': '#fb4934',
+    'hljs-string': '#b8bb26', 'hljs-attr': '#b8bb26',
+    'hljs-number': '#d3869b', 'hljs-literal': '#d3869b',
+    'hljs-title': '#fabd2f', 'hljs-section': '#fabd2f',
+    'hljs-type': '#fabd2f', 'hljs-variable': '#83a598', 'hljs-template-variable': '#83a598',
+    'hljs-tag': '#fb4934', 'hljs-name': '#fb4934', 'hljs-attribute': '#fabd2f',
+    'hljs-symbol': '#83a598', 'hljs-bullet': '#83a598', 'hljs-meta': '#83a598',
+    'hljs-regexp': '#fe8019', 'hljs-link': '#8ec07c',
+    'hljs-deletion': '#fb4934', 'hljs-addition': '#b8bb26', 'hljs-params': '#ebdbb2',
+  },
+  onedark: {
+    'hljs': '#abb2bf', 'hljs-comment': '#5c6370', 'hljs-quote': '#5c6370',
+    'hljs-keyword': '#c678dd', 'hljs-selector-tag': '#c678dd', 'hljs-built_in': '#c678dd',
+    'hljs-string': '#98c379', 'hljs-attr': '#98c379',
+    'hljs-number': '#d19a66', 'hljs-literal': '#d19a66',
+    'hljs-title': '#61afef', 'hljs-section': '#61afef',
+    'hljs-type': '#e5c07b', 'hljs-variable': '#e06c75', 'hljs-template-variable': '#e06c75',
+    'hljs-tag': '#e06c75', 'hljs-name': '#e06c75', 'hljs-attribute': '#d19a66',
+    'hljs-symbol': '#56b6c2', 'hljs-bullet': '#56b6c2', 'hljs-meta': '#56b6c2',
+    'hljs-regexp': '#98c379', 'hljs-link': '#61afef',
+    'hljs-deletion': '#e06c75', 'hljs-addition': '#98c379', 'hljs-params': '#abb2bf',
+  },
+  monokai: {
+    'hljs': '#f8f8f2', 'hljs-comment': '#75715e', 'hljs-quote': '#75715e',
+    'hljs-keyword': '#f92672', 'hljs-selector-tag': '#f92672', 'hljs-built_in': '#f92672',
+    'hljs-string': '#e6db74', 'hljs-attr': '#e6db74',
+    'hljs-number': '#ae81ff', 'hljs-literal': '#ae81ff',
+    'hljs-title': '#a6e22e', 'hljs-section': '#a6e22e',
+    'hljs-type': '#66d9ef', 'hljs-variable': '#f8f8f2', 'hljs-template-variable': '#f8f8f2',
+    'hljs-tag': '#f92672', 'hljs-name': '#a6e22e', 'hljs-attribute': '#a6e22e',
+    'hljs-symbol': '#66d9ef', 'hljs-bullet': '#66d9ef', 'hljs-meta': '#66d9ef',
+    'hljs-regexp': '#f92672', 'hljs-link': '#66d9ef',
+    'hljs-deletion': '#f92672', 'hljs-addition': '#a6e22e', 'hljs-params': '#f8f8f2',
+  },
+  material: {
+    'hljs': '#eeffff', 'hljs-comment': '#546e7a', 'hljs-quote': '#546e7a',
+    'hljs-keyword': '#c792ea', 'hljs-selector-tag': '#c792ea', 'hljs-built_in': '#c792ea',
+    'hljs-string': '#c3e88d', 'hljs-attr': '#c3e88d',
+    'hljs-number': '#f78c6c', 'hljs-literal': '#f78c6c',
+    'hljs-title': '#82aaff', 'hljs-section': '#82aaff',
+    'hljs-type': '#ffcb6b', 'hljs-variable': '#eeffff', 'hljs-template-variable': '#eeffff',
+    'hljs-tag': '#f07178', 'hljs-name': '#f07178', 'hljs-attribute': '#ffcb6b',
+    'hljs-symbol': '#89ddff', 'hljs-bullet': '#89ddff', 'hljs-meta': '#89ddff',
+    'hljs-regexp': '#f07178', 'hljs-link': '#82aaff',
+    'hljs-deletion': '#f07178', 'hljs-addition': '#c3e88d', 'hljs-params': '#eeffff',
+  },
+  catppuccin: {
+    'hljs': '#cdd6f4', 'hljs-comment': '#6c7086', 'hljs-quote': '#6c7086',
+    'hljs-keyword': '#cba6f7', 'hljs-selector-tag': '#cba6f7', 'hljs-built_in': '#cba6f7',
+    'hljs-string': '#a6e3a1', 'hljs-attr': '#a6e3a1',
+    'hljs-number': '#fab387', 'hljs-literal': '#fab387',
+    'hljs-title': '#89b4fa', 'hljs-section': '#89b4fa',
+    'hljs-type': '#f9e2af', 'hljs-variable': '#f38ba8', 'hljs-template-variable': '#f38ba8',
+    'hljs-tag': '#cba6f7', 'hljs-name': '#89b4fa', 'hljs-attribute': '#f9e2af',
+    'hljs-symbol': '#94e2d5', 'hljs-bullet': '#94e2d5', 'hljs-meta': '#94e2d5',
+    'hljs-regexp': '#f38ba8', 'hljs-link': '#89dceb',
+    'hljs-deletion': '#f38ba8', 'hljs-addition': '#a6e3a1', 'hljs-params': '#cdd6f4',
+  },
+  github: {
+    'hljs': '#e1e4e8', 'hljs-comment': '#6a737d', 'hljs-quote': '#6a737d',
+    'hljs-keyword': '#f97583', 'hljs-selector-tag': '#f97583', 'hljs-built_in': '#f97583',
+    'hljs-string': '#9ecbff', 'hljs-attr': '#9ecbff',
+    'hljs-number': '#79b8ff', 'hljs-literal': '#79b8ff',
+    'hljs-title': '#b392f0', 'hljs-section': '#b392f0',
+    'hljs-type': '#b392f0', 'hljs-variable': '#ffab70', 'hljs-template-variable': '#ffab70',
+    'hljs-tag': '#85e89d', 'hljs-name': '#85e89d', 'hljs-attribute': '#79b8ff',
+    'hljs-symbol': '#79b8ff', 'hljs-bullet': '#79b8ff', 'hljs-meta': '#79b8ff',
+    'hljs-regexp': '#db61a2', 'hljs-link': '#79b8ff',
+    'hljs-deletion': '#f97583', 'hljs-addition': '#85e89d', 'hljs-params': '#e1e4e8',
+  },
+  horizon: {
+    'hljs': '#FDF0ED', 'hljs-comment': '#6C6F93', 'hljs-quote': '#6C6F93',
+    'hljs-keyword': '#B877DB', 'hljs-selector-tag': '#B877DB', 'hljs-built_in': '#B877DB',
+    'hljs-string': '#FADAD1', 'hljs-attr': '#FADAD1',
+    'hljs-number': '#F79A7B', 'hljs-literal': '#F79A7B',
+    'hljs-title': '#F9CEC3', 'hljs-section': '#F9CEC3',
+    'hljs-type': '#E95678', 'hljs-variable': '#FDF0ED', 'hljs-template-variable': '#FDF0ED',
+    'hljs-tag': '#E95678', 'hljs-name': '#E95678', 'hljs-attribute': '#F9CEC3',
+    'hljs-symbol': '#25B0BC', 'hljs-bullet': '#25B0BC', 'hljs-meta': '#25B0BC',
+    'hljs-regexp': '#E95678', 'hljs-link': '#25B0BC',
+    'hljs-deletion': '#E95678', 'hljs-addition': '#27D797', 'hljs-params': '#FDF0ED',
+  },
+  nightowl: {
+    'hljs': '#d6deeb', 'hljs-comment': '#637777', 'hljs-quote': '#637777',
+    'hljs-keyword': '#c792ea', 'hljs-selector-tag': '#c792ea', 'hljs-built_in': '#c792ea',
+    'hljs-string': '#ecc48d', 'hljs-attr': '#ecc48d',
+    'hljs-number': '#F78C6C', 'hljs-literal': '#F78C6C',
+    'hljs-title': '#82AAFF', 'hljs-section': '#82AAFF',
+    'hljs-type': '#ffcb8b', 'hljs-variable': '#addb67', 'hljs-template-variable': '#addb67',
+    'hljs-tag': '#7fdbca', 'hljs-name': '#caece6', 'hljs-attribute': '#addb67',
+    'hljs-symbol': '#82AAFF', 'hljs-bullet': '#82AAFF', 'hljs-meta': '#82AAFF',
+    'hljs-regexp': '#5ca7e4', 'hljs-link': '#ff6363',
+    'hljs-deletion': '#ef5350', 'hljs-addition': '#addb67', 'hljs-params': '#d6deeb',
+  },
+  ayu: {
+    'hljs': '#B3B1AD', 'hljs-comment': '#5C6773', 'hljs-quote': '#5C6773',
+    'hljs-keyword': '#FF7733', 'hljs-selector-tag': '#FF7733', 'hljs-built_in': '#FF7733',
+    'hljs-string': '#BAE67E', 'hljs-attr': '#BAE67E',
+    'hljs-number': '#D2A6FF', 'hljs-literal': '#D2A6FF',
+    'hljs-title': '#FFB454', 'hljs-section': '#FFB454',
+    'hljs-type': '#5CCFE6', 'hljs-variable': '#B3B1AD', 'hljs-template-variable': '#B3B1AD',
+    'hljs-tag': '#80D4FF', 'hljs-name': '#80D4FF', 'hljs-attribute': '#FFB454',
+    'hljs-symbol': '#5CCFE6', 'hljs-bullet': '#5CCFE6', 'hljs-meta': '#5CCFE6',
+    'hljs-regexp': '#95E6CB', 'hljs-link': '#5CCFE6',
+    'hljs-deletion': '#F07178', 'hljs-addition': '#BAE67E', 'hljs-params': '#B3B1AD',
+  },
+  sop: {
+    'hljs': '#E1EFFF', 'hljs-comment': '#B362FF', 'hljs-quote': '#B362FF',
+    'hljs-keyword': '#FF9D00', 'hljs-selector-tag': '#FF9D00', 'hljs-built_in': '#FF9D00',
+    'hljs-string': '#A5FF90', 'hljs-attr': '#A5FF90',
+    'hljs-number': '#FF628C', 'hljs-literal': '#FF628C',
+    'hljs-title': '#FAD000', 'hljs-section': '#FAD000',
+    'hljs-type': '#9EFFFF', 'hljs-variable': '#E1EFFF', 'hljs-template-variable': '#E1EFFF',
+    'hljs-tag': '#9EFFFF', 'hljs-name': '#9EFFFF', 'hljs-attribute': '#FAD000',
+    'hljs-symbol': '#E1EFFF', 'hljs-bullet': '#E1EFFF', 'hljs-meta': '#E1EFFF',
+    'hljs-regexp': '#FF628C', 'hljs-link': '#9EFFFF',
+    'hljs-deletion': '#FF628C', 'hljs-addition': '#A5FF90', 'hljs-params': '#E1EFFF',
+  },
+  palenight: {
+    'hljs': '#A6ACCD', 'hljs-comment': '#676E95', 'hljs-quote': '#676E95',
+    'hljs-keyword': '#C792EA', 'hljs-selector-tag': '#C792EA', 'hljs-built_in': '#C792EA',
+    'hljs-string': '#C3E88D', 'hljs-attr': '#C3E88D',
+    'hljs-number': '#F78C6C', 'hljs-literal': '#F78C6C',
+    'hljs-title': '#82AAFF', 'hljs-section': '#82AAFF',
+    'hljs-type': '#FFCB6B', 'hljs-variable': '#EEFFFF', 'hljs-template-variable': '#EEFFFF',
+    'hljs-tag': '#F07178', 'hljs-name': '#F07178', 'hljs-attribute': '#C792EA',
+    'hljs-symbol': '#89DDFF', 'hljs-bullet': '#89DDFF', 'hljs-meta': '#89DDFF',
+    'hljs-regexp': '#F07178', 'hljs-link': '#82AAFF',
+    'hljs-deletion': '#F07178', 'hljs-addition': '#C3E88D', 'hljs-params': '#A6ACCD',
+  },
+  vitesse: {
+    'hljs': '#dbd7ca', 'hljs-comment': '#758575', 'hljs-quote': '#758575',
+    'hljs-keyword': '#CB7676', 'hljs-selector-tag': '#CB7676', 'hljs-built_in': '#CB7676',
+    'hljs-string': '#C99076', 'hljs-attr': '#C99076',
+    'hljs-number': '#4C9A91', 'hljs-literal': '#4C9A91',
+    'hljs-title': '#80A665', 'hljs-section': '#80A665',
+    'hljs-type': '#5DA9A7', 'hljs-variable': '#BD976A', 'hljs-template-variable': '#BD976A',
+    'hljs-tag': '#4D9375', 'hljs-name': '#4D9375', 'hljs-attribute': '#C99076',
+    'hljs-symbol': '#4C9A91', 'hljs-bullet': '#4C9A91', 'hljs-meta': '#4C9A91',
+    'hljs-regexp': '#C4704F', 'hljs-link': '#5DA9A7',
+    'hljs-deletion': '#CB7676', 'hljs-addition': '#80A665', 'hljs-params': '#dbd7ca',
+  },
+};
+
+/* ---------- 初始化语言下拉 ---------- */
+function initLangMenu() {
+  langMenu.innerHTML = LANGUAGES.map(l => `
+    <div class="lang-option ${l.value === currentLang ? 'active' : ''}" data-value="${l.value}" role="option">
+      <span>${l.name}</span>
+      <span class="ext">${l.ext}</span>
+    </div>
+  `).join('');
+
+  langMenu.querySelectorAll('.lang-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const v = opt.dataset.value;
+      setLanguage(v);
+      closeLangMenu();
+    });
+  });
+}
+
+function setLanguage(value) {
+  currentLang = value;
+  const lang = LANGUAGES.find(l => l.value === value) || LANGUAGES[0];
+  langLabel.textContent = lang.name;
+  langMenu.querySelectorAll('.lang-option').forEach(o => {
+    o.classList.toggle('active', o.dataset.value === value);
+  });
+  // 确保该语言已加载，再渲染
+  ensureLanguage(value).then(() => render());
+}
+
+/**
+ * 确保某个语言的高亮定义已加载。
+ * - 已注册到 hljs 的直接跳过
+ * - 未加载的语言从 CDN 动态拉取 languages/{lang}.min.js
+ * - 同一语言并发请求只发一次
+ */
+function ensureLanguage(value) {
+  // plaintext 走纯文本分支，不需要高亮定义
+  if (value === 'plaintext') return Promise.resolve();
+  // 已注册到 hljs 中
+  if (hljs.getLanguage(value)) {
+    loadedLangs.add(value);
+    return Promise.resolve();
+  }
+  // 正在加载中
+  if (loadingLangs.has(value)) return loadingLangs.get(value);
+
+  const p = new Promise((resolve) => {
+    const s = document.createElement('script');
+    s.src = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/${value}.min.js`;
+    s.async = true;
+    s.onload = () => {
+      loadedLangs.add(value);
+      loadingLangs.delete(value);
+      resolve();
+    };
+    s.onerror = () => {
+      // 加载失败也 resolve，渲染时降级为纯文本
+      loadingLangs.delete(value);
+      resolve();
+    };
+    document.head.appendChild(s);
+  });
+  loadingLangs.set(value, p);
+  return p;
+}
+
+/**
+ * 后台预加载所有语言（不阻塞渲染）。
+ * 页面初始化后立即并行拉取，用户切换时基本已就绪。
+ */
+function preloadAllLanguages() {
+  LANGUAGES.forEach(l => {
+    if (l.value !== 'plaintext' && !hljs.getLanguage(l.value) && !loadingLangs.has(l.value)) {
+      ensureLanguage(l.value);
+    }
+  });
+}
+
+function toggleLangMenu() {
+  const open = langSelect.classList.toggle('open');
+  langMenu.classList.toggle('open', open);
+  langTrigger.setAttribute('aria-expanded', open);
+  if (open) {
+    const rect = langTrigger.getBoundingClientRect();
+    langMenu.style.top = (rect.bottom + 8) + 'px';
+    langMenu.style.left = rect.left + 'px';
+    langMenu.style.width = Math.max(rect.width, 200) + 'px';
+  }
+}
+function closeLangMenu() {
+  langSelect.classList.remove('open');
+  langMenu.classList.remove('open');
+  langTrigger.setAttribute('aria-expanded', 'false');
+}
+
+langTrigger.addEventListener('click', toggleLangMenu);
+document.addEventListener('click', (e) => {
+  if (!langSelect.contains(e.target) && !langMenu.contains(e.target)) closeLangMenu();
+});
+window.addEventListener('resize', closeLangMenu);
+
+/* ---------- 主题切换 ---------- */
+function setTheme(theme) {
+  currentTheme = theme;
+  previewCode.setAttribute('data-theme', theme);
+  themeSwitcher.querySelectorAll('.theme-chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.theme === theme);
+  });
+}
+
+themeSwitcher.querySelectorAll('.theme-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    setTheme(chip.dataset.theme);
+    showToast(`已切换主题: ${chip.querySelector('.chip-label').textContent}`);
+  });
+});
+
+// 初始化默认主题
+setTheme('lumen');
+
+/* ---------- 渲染高亮预览 ---------- */
+function escapeHtml(s) {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function render() {
+  const code = editor.value;
+
+  // 行号
+  const lineCount = code ? code.split('\n').length : 1;
+  const lines = Array.from({ length: lineCount }, (_, i) => `<div>${i + 1}</div>`).join('');
+  editorGutter.innerHTML = lines;
+  previewGutter.innerHTML = lines;
+
+  // 高亮
+  if (currentLang === 'plaintext' || code.trim() === '') {
+    preview.textContent = code || ' ';
+    preview.className = 'hljs';
+  } else if (hljs.getLanguage(currentLang)) {
+    try {
+      const result = hljs.highlight(code || ' ', { language: currentLang, ignoreIllegals: true });
+      preview.innerHTML = result.value;
+    } catch (e) {
+      preview.textContent = code;
+      preview.className = 'hljs';
+    }
+  } else {
+    // 语言尚未加载完成，先纯文本显示
+    preview.textContent = code || ' ';
+    preview.className = 'hljs';
+  }
+
+  // 统计
+  statLines.textContent = lineCount;
+  statChars.textContent = code.length;
+  if (loadingLangs.has(currentLang)) {
+    editorMeta.textContent = `加载 ${currentLang} 中...`;
+  } else {
+    editorMeta.textContent = code.length === 0 ? '就绪' : `已编辑 · ${lineCount} 行`;
+  }
+}
+
+editor.addEventListener('input', render);
+
+/* ---------- 左右联动滚动 ---------- */
+let syncingScroll = false;
+
+// 编辑器滚动 → 同步行号 + 联动预览
+editor.addEventListener('scroll', () => {
+  editorGutter.scrollTop = editor.scrollTop;
+  if (syncingScroll) return;
+  syncingScroll = true;
+  previewWrap.scrollTop = editor.scrollTop;
+  previewWrap.scrollLeft = editor.scrollLeft;
+  requestAnimationFrame(() => { syncingScroll = false; });
+});
+
+// 预览滚动 → 联动编辑器
+previewWrap.addEventListener('scroll', () => {
+  if (syncingScroll) return;
+  syncingScroll = true;
+  editor.scrollTop = previewWrap.scrollTop;
+  editor.scrollLeft = previewWrap.scrollLeft;
+  requestAnimationFrame(() => { syncingScroll = false; });
+});
+
+// Tab 键插入两个空格
+editor.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    editor.value = editor.value.slice(0, start) + '  ' + editor.value.slice(end);
+    editor.selectionStart = editor.selectionEnd = start + 2;
+    render();
+  }
+});
+
+/* ---------- 构建 Word 兼容 HTML ---------- */
+/* 已重构为 buildClipboardHtml() 和 buildDocHtml()，见上方实现 */
+
+/* ---------- Word 导出专用配色：每套主题对应一个白底可读版本 ---------- */
+/* 配色与预览主题同色系，但加深到白底可读程度 */
+const THEME_WORD_MAPS = {
+  lumen: {
+    'hljs': '#1e1e1e', 'hljs-comment': '#7a7a8a', 'hljs-quote': '#7a7a8a',
+    'hljs-keyword': '#1565c0', 'hljs-selector-tag': '#1565c0', 'hljs-built_in': '#1565c0',
+    'hljs-string': '#2e7d32', 'hljs-attr': '#2e7d32',
+    'hljs-number': '#e65100', 'hljs-literal': '#e65100',
+    'hljs-title': '#0277bd', 'hljs-section': '#0277bd',
+    'hljs-type': '#00838f', 'hljs-variable': '#bf360c', 'hljs-template-variable': '#bf360c',
+    'hljs-tag': '#1565c0', 'hljs-name': '#2e7d32', 'hljs-attribute': '#f57f17',
+    'hljs-symbol': '#1565c0', 'hljs-bullet': '#1565c0', 'hljs-meta': '#1565c0',
+    'hljs-regexp': '#c62828', 'hljs-link': '#00838f',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#2e7d32', 'hljs-params': '#1e1e1e',
+  },
+  aurora: {
+    'hljs': '#0d3b4e', 'hljs-comment': '#5a7a85', 'hljs-quote': '#5a7a85',
+    'hljs-keyword': '#00838f', 'hljs-selector-tag': '#00838f', 'hljs-built_in': '#00838f',
+    'hljs-string': '#00695c', 'hljs-attr': '#00695c',
+    'hljs-number': '#f57f17', 'hljs-literal': '#f57f17',
+    'hljs-title': '#0277bd', 'hljs-section': '#0277bd',
+    'hljs-type': '#00838f', 'hljs-variable': '#01579b', 'hljs-template-variable': '#01579b',
+    'hljs-tag': '#0277bd', 'hljs-name': '#00838f', 'hljs-attribute': '#f57f17',
+    'hljs-symbol': '#00695c', 'hljs-bullet': '#00695c', 'hljs-meta': '#00695c',
+    'hljs-regexp': '#c62828', 'hljs-link': '#00838f',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#00695c', 'hljs-params': '#0d3b4e',
+  },
+  synthwave: {
+    'hljs': '#3e3e4e', 'hljs-comment': '#7a6a8a', 'hljs-quote': '#7a6a8a',
+    'hljs-keyword': '#c62828', 'hljs-selector-tag': '#c62828', 'hljs-built_in': '#c62828',
+    'hljs-string': '#c97b00', 'hljs-attr': '#c97b00',
+    'hljs-number': '#e65100', 'hljs-literal': '#e65100',
+    'hljs-title': '#1565c0', 'hljs-section': '#1565c0',
+    'hljs-type': '#00838f', 'hljs-variable': '#1565c0', 'hljs-template-variable': '#1565c0',
+    'hljs-tag': '#c62828', 'hljs-name': '#c62828', 'hljs-attribute': '#c97b00',
+    'hljs-symbol': '#1565c0', 'hljs-bullet': '#1565c0', 'hljs-meta': '#1565c0',
+    'hljs-regexp': '#c62828', 'hljs-link': '#00838f',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#2e7d32', 'hljs-params': '#3e3e4e',
+  },
+  ember: {
+    'hljs': '#4e2a1a', 'hljs-comment': '#8a7a6a', 'hljs-quote': '#8a7a6a',
+    'hljs-keyword': '#bf360c', 'hljs-selector-tag': '#bf360c', 'hljs-built_in': '#bf360c',
+    'hljs-string': '#c97b00', 'hljs-attr': '#c97b00',
+    'hljs-number': '#e65100', 'hljs-literal': '#e65100',
+    'hljs-title': '#d84315', 'hljs-section': '#d84315',
+    'hljs-type': '#bf360c', 'hljs-variable': '#a13114', 'hljs-template-variable': '#a13114',
+    'hljs-tag': '#d84315', 'hljs-name': '#bf360c', 'hljs-attribute': '#c97b00',
+    'hljs-symbol': '#5d4037', 'hljs-bullet': '#5d4037', 'hljs-meta': '#5d4037',
+    'hljs-regexp': '#c62828', 'hljs-link': '#f57f17',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#2e7d32', 'hljs-params': '#4e2a1a',
+  },
+  forest: {
+    'hljs': '#1b3a1b', 'hljs-comment': '#6a7a5a', 'hljs-quote': '#6a7a5a',
+    'hljs-keyword': '#2e7d32', 'hljs-selector-tag': '#2e7d32', 'hljs-built_in': '#2e7d32',
+    'hljs-string': '#558b2f', 'hljs-attr': '#558b2f',
+    'hljs-number': '#ef6c00', 'hljs-literal': '#ef6c00',
+    'hljs-title': '#33691e', 'hljs-section': '#33691e',
+    'hljs-type': '#00695c', 'hljs-variable': '#5d4037', 'hljs-template-variable': '#5d4037',
+    'hljs-tag': '#2e7d32', 'hljs-name': '#33691e', 'hljs-attribute': '#f9a825',
+    'hljs-symbol': '#5d4037', 'hljs-bullet': '#5d4037', 'hljs-meta': '#5d4037',
+    'hljs-regexp': '#c62828', 'hljs-link': '#00838f',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#558b2f', 'hljs-params': '#1b3a1b',
+  },
+  tokyo: {
+    'hljs': '#1a2a4e', 'hljs-comment': '#5a6a8a', 'hljs-quote': '#5a6a8a',
+    'hljs-keyword': '#0277bd', 'hljs-selector-tag': '#0277bd', 'hljs-built_in': '#0277bd',
+    'hljs-string': '#2e7d32', 'hljs-attr': '#2e7d32',
+    'hljs-number': '#e65100', 'hljs-literal': '#e65100',
+    'hljs-title': '#1565c0', 'hljs-section': '#1565c0',
+    'hljs-type': '#00838f', 'hljs-variable': '#c97b00', 'hljs-template-variable': '#c97b00',
+    'hljs-tag': '#00695c', 'hljs-name': '#0277bd', 'hljs-attribute': '#f57f17',
+    'hljs-symbol': '#1565c0', 'hljs-bullet': '#1565c0', 'hljs-meta': '#1565c0',
+    'hljs-regexp': '#c62828', 'hljs-link': '#0277bd',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#2e7d32', 'hljs-params': '#1a2a4e',
+  },
+  dracula: {
+    'hljs': '#2a2a3e', 'hljs-comment': '#6a6a8a', 'hljs-quote': '#6a6a8a',
+    'hljs-keyword': '#c62828', 'hljs-selector-tag': '#c62828', 'hljs-built_in': '#c62828',
+    'hljs-string': '#827717', 'hljs-attr': '#827717',
+    'hljs-number': '#1565c0', 'hljs-literal': '#1565c0',
+    'hljs-title': '#2e7d32', 'hljs-section': '#2e7d32',
+    'hljs-type': '#00838f', 'hljs-variable': '#2a2a3e', 'hljs-template-variable': '#2a2a3e',
+    'hljs-tag': '#c62828', 'hljs-name': '#2e7d32', 'hljs-attribute': '#2e7d32',
+    'hljs-symbol': '#1565c0', 'hljs-bullet': '#1565c0', 'hljs-meta': '#1565c0',
+    'hljs-regexp': '#ef6c00', 'hljs-link': '#00838f',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#2e7d32', 'hljs-params': '#2a2a3e',
+  },
+  nordic: {
+    'hljs': '#2e3b4e', 'hljs-comment': '#6a7a8a', 'hljs-quote': '#6a7a8a',
+    'hljs-keyword': '#1565c0', 'hljs-selector-tag': '#1565c0', 'hljs-built_in': '#1565c0',
+    'hljs-string': '#558b2f', 'hljs-attr': '#558b2f',
+    'hljs-number': '#1565c0', 'hljs-literal': '#1565c0',
+    'hljs-title': '#00838f', 'hljs-section': '#00838f',
+    'hljs-type': '#00695c', 'hljs-variable': '#2e3b4e', 'hljs-template-variable': '#2e3b4e',
+    'hljs-tag': '#1565c0', 'hljs-name': '#00695c', 'hljs-attribute': '#f9a825',
+    'hljs-symbol': '#1565c0', 'hljs-bullet': '#1565c0', 'hljs-meta': '#1565c0',
+    'hljs-regexp': '#c62828', 'hljs-link': '#00838f',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#558b2f', 'hljs-params': '#2e3b4e',
+  },
+  solar: {
+    'hljs': '#1e3a4e', 'hljs-comment': '#5a6a7a', 'hljs-quote': '#5a6a7a',
+    'hljs-keyword': '#558b2f', 'hljs-selector-tag': '#558b2f', 'hljs-built_in': '#558b2f',
+    'hljs-string': '#00838f', 'hljs-attr': '#00838f',
+    'hljs-number': '#d84315', 'hljs-literal': '#d84315',
+    'hljs-title': '#1565c0', 'hljs-section': '#1565c0',
+    'hljs-type': '#e65100', 'hljs-variable': '#bf360c', 'hljs-template-variable': '#bf360c',
+    'hljs-tag': '#1565c0', 'hljs-name': '#558b2f', 'hljs-attribute': '#e65100',
+    'hljs-symbol': '#d84315', 'hljs-bullet': '#d84315', 'hljs-meta': '#d84315',
+    'hljs-regexp': '#c62828', 'hljs-link': '#00838f',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#558b2f', 'hljs-params': '#1e3a4e',
+  },
+  cyber: {
+    'hljs': '#2a2a3e', 'hljs-comment': '#6a6a7a', 'hljs-quote': '#6a6a7a',
+    'hljs-keyword': '#d84315', 'hljs-selector-tag': '#d84315', 'hljs-built_in': '#d84315',
+    'hljs-string': '#827717', 'hljs-attr': '#827717',
+    'hljs-number': '#00838f', 'hljs-literal': '#00838f',
+    'hljs-title': '#2e7d32', 'hljs-section': '#2e7d32',
+    'hljs-type': '#bf360c', 'hljs-variable': '#33691e', 'hljs-template-variable': '#33691e',
+    'hljs-tag': '#d84315', 'hljs-name': '#00838f', 'hljs-attribute': '#ef6c00',
+    'hljs-symbol': '#1565c0', 'hljs-bullet': '#1565c0', 'hljs-meta': '#1565c0',
+    'hljs-regexp': '#c62828', 'hljs-link': '#00838f',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#2e7d32', 'hljs-params': '#2a2a3e',
+  },
+  rosepine: {
+    'hljs': '#4a3a4e', 'hljs-comment': '#7a6a7a', 'hljs-quote': '#7a6a7a',
+    'hljs-keyword': '#1565c0', 'hljs-selector-tag': '#1565c0', 'hljs-built_in': '#1565c0',
+    'hljs-string': '#d84315', 'hljs-attr': '#d84315',
+    'hljs-number': '#d84315', 'hljs-literal': '#d84315',
+    'hljs-title': '#00838f', 'hljs-section': '#00838f',
+    'hljs-type': '#e65100', 'hljs-variable': '#bf360c', 'hljs-template-variable': '#bf360c',
+    'hljs-tag': '#1565c0', 'hljs-name': '#00838f', 'hljs-attribute': '#e65100',
+    'hljs-symbol': '#1565c0', 'hljs-bullet': '#1565c0', 'hljs-meta': '#1565c0',
+    'hljs-regexp': '#d84315', 'hljs-link': '#00838f',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#00838f', 'hljs-params': '#4a3a4e',
+  },
+  gruvbox: {
+    'hljs': '#3c3836', 'hljs-comment': '#928374', 'hljs-quote': '#928374',
+    'hljs-keyword': '#cc241d', 'hljs-selector-tag': '#cc241d', 'hljs-built_in': '#cc241d',
+    'hljs-string': '#79740e', 'hljs-attr': '#79740e',
+    'hljs-number': '#8f3f71', 'hljs-literal': '#8f3f71',
+    'hljs-title': '#b57614', 'hljs-section': '#b57614',
+    'hljs-type': '#b57614', 'hljs-variable': '#076678', 'hljs-template-variable': '#076678',
+    'hljs-tag': '#cc241d', 'hljs-name': '#cc241d', 'hljs-attribute': '#b57614',
+    'hljs-symbol': '#076678', 'hljs-bullet': '#076678', 'hljs-meta': '#076678',
+    'hljs-regexp': '#af3a03', 'hljs-link': '#427b58',
+    'hljs-deletion': '#cc241d', 'hljs-addition': '#79740e', 'hljs-params': '#3c3836',
+  },
+  onedark: {
+    'hljs': '#383a42', 'hljs-comment': '#6a6a7a', 'hljs-quote': '#6a6a7a',
+    'hljs-keyword': '#a626a4', 'hljs-selector-tag': '#a626a4', 'hljs-built_in': '#a626a4',
+    'hljs-string': '#50a14f', 'hljs-attr': '#50a14f',
+    'hljs-number': '#c18401', 'hljs-literal': '#c18401',
+    'hljs-title': '#4078f2', 'hljs-section': '#4078f2',
+    'hljs-type': '#c18401', 'hljs-variable': '#e45649', 'hljs-template-variable': '#e45649',
+    'hljs-tag': '#e45649', 'hljs-name': '#e45649', 'hljs-attribute': '#c18401',
+    'hljs-symbol': '#0184bc', 'hljs-bullet': '#0184bc', 'hljs-meta': '#0184bc',
+    'hljs-regexp': '#50a14f', 'hljs-link': '#4078f2',
+    'hljs-deletion': '#e45649', 'hljs-addition': '#50a14f', 'hljs-params': '#383a42',
+  },
+  monokai: {
+    'hljs': '#272822', 'hljs-comment': '#75715e', 'hljs-quote': '#75715e',
+    'hljs-keyword': '#c62828', 'hljs-selector-tag': '#c62828', 'hljs-built_in': '#c62828',
+    'hljs-string': '#827717', 'hljs-attr': '#827717',
+    'hljs-number': '#6a1b9a', 'hljs-literal': '#6a1b9a',
+    'hljs-title': '#558b2f', 'hljs-section': '#558b2f',
+    'hljs-type': '#00838f', 'hljs-variable': '#272822', 'hljs-template-variable': '#272822',
+    'hljs-tag': '#c62828', 'hljs-name': '#558b2f', 'hljs-attribute': '#558b2f',
+    'hljs-symbol': '#00838f', 'hljs-bullet': '#00838f', 'hljs-meta': '#00838f',
+    'hljs-regexp': '#c62828', 'hljs-link': '#00838f',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#558b2f', 'hljs-params': '#272822',
+  },
+  material: {
+    'hljs': '#263238', 'hljs-comment': '#546e7a', 'hljs-quote': '#546e7a',
+    'hljs-keyword': '#7b1fa2', 'hljs-selector-tag': '#7b1fa2', 'hljs-built_in': '#7b1fa2',
+    'hljs-string': '#558b2f', 'hljs-attr': '#558b2f',
+    'hljs-number': '#e65100', 'hljs-literal': '#e65100',
+    'hljs-title': '#1565c0', 'hljs-section': '#1565c0',
+    'hljs-type': '#f57f17', 'hljs-variable': '#263238', 'hljs-template-variable': '#263238',
+    'hljs-tag': '#c62828', 'hljs-name': '#c62828', 'hljs-attribute': '#f57f17',
+    'hljs-symbol': '#0277bd', 'hljs-bullet': '#0277bd', 'hljs-meta': '#0277bd',
+    'hljs-regexp': '#c62828', 'hljs-link': '#1565c0',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#558b2f', 'hljs-params': '#263238',
+  },
+  catppuccin: {
+    'hljs': '#4c4f69', 'hljs-comment': '#6c7086', 'hljs-quote': '#6c7086',
+    'hljs-keyword': '#8839ef', 'hljs-selector-tag': '#8839ef', 'hljs-built_in': '#8839ef',
+    'hljs-string': '#40a02b', 'hljs-attr': '#40a02b',
+    'hljs-number': '#fe640b', 'hljs-literal': '#fe640b',
+    'hljs-title': '#1e66f5', 'hljs-section': '#1e66f5',
+    'hljs-type': '#df8e1d', 'hljs-variable': '#d20f39', 'hljs-template-variable': '#d20f39',
+    'hljs-tag': '#8839ef', 'hljs-name': '#1e66f5', 'hljs-attribute': '#df8e1d',
+    'hljs-symbol': '#179299', 'hljs-bullet': '#179299', 'hljs-meta': '#179299',
+    'hljs-regexp': '#d20f39', 'hljs-link': '#04a5e5',
+    'hljs-deletion': '#d20f39', 'hljs-addition': '#40a02b', 'hljs-params': '#4c4f69',
+  },
+  github: {
+    'hljs': '#24292e', 'hljs-comment': '#6a737d', 'hljs-quote': '#6a737d',
+    'hljs-keyword': '#d73a49', 'hljs-selector-tag': '#d73a49', 'hljs-built_in': '#d73a49',
+    'hljs-string': '#032f62', 'hljs-attr': '#032f62',
+    'hljs-number': '#005cc5', 'hljs-literal': '#005cc5',
+    'hljs-title': '#6f42c1', 'hljs-section': '#6f42c1',
+    'hljs-type': '#6f42c1', 'hljs-variable': '#e36209', 'hljs-template-variable': '#e36209',
+    'hljs-tag': '#22863a', 'hljs-name': '#22863a', 'hljs-attribute': '#005cc5',
+    'hljs-symbol': '#005cc5', 'hljs-bullet': '#005cc5', 'hljs-meta': '#005cc5',
+    'hljs-regexp': '#d73a49', 'hljs-link': '#005cc5',
+    'hljs-deletion': '#d73a49', 'hljs-addition': '#22863a', 'hljs-params': '#24292e',
+  },
+  mono: {
+    'hljs': '#1a1a1a', 'hljs-comment': '#757575', 'hljs-quote': '#757575',
+    'hljs-keyword': '#000000', 'hljs-selector-tag': '#000000', 'hljs-built_in': '#000000',
+    'hljs-string': '#424242', 'hljs-attr': '#424242',
+    'hljs-number': '#616161', 'hljs-literal': '#616161',
+    'hljs-title': '#212121', 'hljs-section': '#212121',
+    'hljs-type': '#424242', 'hljs-variable': '#616161', 'hljs-template-variable': '#616161',
+    'hljs-tag': '#757575', 'hljs-name': '#000000', 'hljs-attribute': '#424242',
+    'hljs-symbol': '#757575', 'hljs-bullet': '#757575', 'hljs-meta': '#757575',
+    'hljs-regexp': '#616161', 'hljs-link': '#757575',
+    'hljs-deletion': '#9e9e9e', 'hljs-addition': '#424242', 'hljs-params': '#1a1a1a',
+  },
+  horizon: {
+    'hljs': '#4e3a2e', 'hljs-comment': '#7a6a5a', 'hljs-quote': '#7a6a5a',
+    'hljs-keyword': '#8b3ea0', 'hljs-selector-tag': '#8b3ea0', 'hljs-built_in': '#8b3ea0',
+    'hljs-string': '#d4585a', 'hljs-attr': '#d4585a',
+    'hljs-number': '#d84315', 'hljs-literal': '#d84315',
+    'hljs-title': '#c62828', 'hljs-section': '#c62828',
+    'hljs-type': '#c62828', 'hljs-variable': '#4e3a2e', 'hljs-template-variable': '#4e3a2e',
+    'hljs-tag': '#c62828', 'hljs-name': '#c62828', 'hljs-attribute': '#c62828',
+    'hljs-symbol': '#00695c', 'hljs-bullet': '#00695c', 'hljs-meta': '#00695c',
+    'hljs-regexp': '#c62828', 'hljs-link': '#00695c',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#00695c', 'hljs-params': '#4e3a2e',
+  },
+  nightowl: {
+    'hljs': '#2a3a5e', 'hljs-comment': '#6a7a8a', 'hljs-quote': '#6a7a8a',
+    'hljs-keyword': '#7b1fa2', 'hljs-selector-tag': '#7b1fa2', 'hljs-built_in': '#7b1fa2',
+    'hljs-string': '#c97b00', 'hljs-attr': '#c97b00',
+    'hljs-number': '#e65100', 'hljs-literal': '#e65100',
+    'hljs-title': '#1565c0', 'hljs-section': '#1565c0',
+    'hljs-type': '#f57f17', 'hljs-variable': '#558b2f', 'hljs-template-variable': '#558b2f',
+    'hljs-tag': '#00695c', 'hljs-name': '#00695c', 'hljs-attribute': '#558b2f',
+    'hljs-symbol': '#1565c0', 'hljs-bullet': '#1565c0', 'hljs-meta': '#1565c0',
+    'hljs-regexp': '#0277bd', 'hljs-link': '#c62828',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#558b2f', 'hljs-params': '#2a3a5e',
+  },
+  ayu: {
+    'hljs': '#3a3a2e', 'hljs-comment': '#6a6a5a', 'hljs-quote': '#6a6a5a',
+    'hljs-keyword': '#d84315', 'hljs-selector-tag': '#d84315', 'hljs-built_in': '#d84315',
+    'hljs-string': '#558b2f', 'hljs-attr': '#558b2f',
+    'hljs-number': '#6a1b9a', 'hljs-literal': '#6a1b9a',
+    'hljs-title': '#e65100', 'hljs-section': '#e65100',
+    'hljs-type': '#00838f', 'hljs-variable': '#3a3a2e', 'hljs-template-variable': '#3a3a2e',
+    'hljs-tag': '#01579b', 'hljs-name': '#01579b', 'hljs-attribute': '#e65100',
+    'hljs-symbol': '#00838f', 'hljs-bullet': '#00838f', 'hljs-meta': '#00838f',
+    'hljs-regexp': '#00695c', 'hljs-link': '#00838f',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#558b2f', 'hljs-params': '#3a3a2e',
+  },
+  sop: {
+    'hljs': '#2a2a4e', 'hljs-comment': '#8a5ac0', 'hljs-quote': '#8a5ac0',
+    'hljs-keyword': '#e65100', 'hljs-selector-tag': '#e65100', 'hljs-built_in': '#e65100',
+    'hljs-string': '#2e7d32', 'hljs-attr': '#2e7d32',
+    'hljs-number': '#c62828', 'hljs-literal': '#c62828',
+    'hljs-title': '#f57f17', 'hljs-section': '#f57f17',
+    'hljs-type': '#00838f', 'hljs-variable': '#2a2a4e', 'hljs-template-variable': '#2a2a4e',
+    'hljs-tag': '#00838f', 'hljs-name': '#00838f', 'hljs-attribute': '#f57f17',
+    'hljs-symbol': '#2a2a4e', 'hljs-bullet': '#2a2a4e', 'hljs-meta': '#2a2a4e',
+    'hljs-regexp': '#c62828', 'hljs-link': '#00838f',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#2e7d32', 'hljs-params': '#2a2a4e',
+  },
+  palenight: {
+    'hljs': '#3a3a5e', 'hljs-comment': '#6a6a8a', 'hljs-quote': '#6a6a8a',
+    'hljs-keyword': '#7b1fa2', 'hljs-selector-tag': '#7b1fa2', 'hljs-built_in': '#7b1fa2',
+    'hljs-string': '#558b2f', 'hljs-attr': '#558b2f',
+    'hljs-number': '#e65100', 'hljs-literal': '#e65100',
+    'hljs-title': '#1565c0', 'hljs-section': '#1565c0',
+    'hljs-type': '#f57f17', 'hljs-variable': '#1a1a1a', 'hljs-template-variable': '#1a1a1a',
+    'hljs-tag': '#c62828', 'hljs-name': '#c62828', 'hljs-attribute': '#7b1fa2',
+    'hljs-symbol': '#0277bd', 'hljs-bullet': '#0277bd', 'hljs-meta': '#0277bd',
+    'hljs-regexp': '#c62828', 'hljs-link': '#1565c0',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#558b2f', 'hljs-params': '#3a3a5e',
+  },
+  vitesse: {
+    'hljs': '#3a3a2e', 'hljs-comment': '#757575', 'hljs-quote': '#757575',
+    'hljs-keyword': '#c62828', 'hljs-selector-tag': '#c62828', 'hljs-built_in': '#c62828',
+    'hljs-string': '#bf360c', 'hljs-attr': '#bf360c',
+    'hljs-number': '#00695c', 'hljs-literal': '#00695c',
+    'hljs-title': '#558b2f', 'hljs-section': '#558b2f',
+    'hljs-type': '#00838f', 'hljs-variable': '#8d6e00', 'hljs-template-variable': '#8d6e00',
+    'hljs-tag': '#2e7d32', 'hljs-name': '#2e7d32', 'hljs-attribute': '#bf360c',
+    'hljs-symbol': '#00695c', 'hljs-bullet': '#00695c', 'hljs-meta': '#00695c',
+    'hljs-regexp': '#d84315', 'hljs-link': '#00838f',
+    'hljs-deletion': '#c62828', 'hljs-addition': '#558b2f', 'hljs-params': '#3a3a2e',
+  },
+};
+
+
+/**
+ * 生成高亮后的内联样式 HTML 片段（不带 <html><head> 包裹）。
+ *
+ * format 参数：
+ *   'preview' → 使用当前预览主题配色（暗底浅色文字），与右侧预览区一致
+ *   'style'   → 使用 Word 白底可读配色（THEME_WORD_MAPS），生成 <span style="color:...">
+ *   'word'    → 使用 Word 白底可读配色，生成 <font color> + <b>/<i>（兼容性最好，已随复制按钮移除）
+ */
+function highlightToInlineSpans(code, format = 'preview') {
+  let highlighted;
+  if (currentLang === 'plaintext' || code.trim() === '') {
+    highlighted = escapeHtml(code);
+  } else {
+    try {
+      highlighted = hljs.highlight(code || ' ', { language: currentLang, ignoreIllegals: true }).value;
+    } catch (e) {
+      highlighted = escapeHtml(code);
+    }
+  }
+
+  // 根据模式选择配色表：preview 模式与右侧预览完全一致；style/word 模式用白底可读版本
+  const isPreview = format === 'preview';
+  const colorMapSource = isPreview
+    ? (THEME_COLOR_MAPS[currentTheme] || THEME_COLOR_MAPS.lumen)
+    : (THEME_WORD_MAPS[currentTheme] || THEME_WORD_MAPS.lumen);
+
+  if (format === 'word') {
+    const tokenRe = /<span class="([^"]+)">|<\/span>|([^<]+)/g;
+    const out = [];
+    let m;
+    const stack = [];
+    while ((m = tokenRe.exec(highlighted)) !== null) {
+      if (m[1]) {
+        const classes = m[1].split(' ');
+        const color = classes.map(c => colorMapSource[c]).filter(Boolean)[0] || colorMapSource['hljs'] || '#1e1e1e';
+        let isBold = false;
+        let isItalic = false;
+        classes.forEach(c => {
+          if (c === 'hljs-comment' || c === 'hljs-quote') isItalic = true;
+          if (c === 'hljs-keyword' || c === 'hljs-selector-tag' || c === 'hljs-built_in') isBold = true;
+          if (currentTheme === 'mono' && c === 'hljs-type') isItalic = true;
+        });
+        stack.push({ isBold, isItalic });
+        let open = `<font color="${color}">`;
+        if (isBold) open += '<b>';
+        if (isItalic) open += '<i>';
+        out.push(open);
+      } else if (m[0] === '</span>') {
+        const state = stack.pop() || {};
+        let close = '';
+        if (state.isItalic) close += '</i>';
+        if (state.isBold) close += '</b>';
+        close += '</font>';
+        out.push(close);
+      } else {
+        out.push(m[2]);
+      }
+    }
+    return out.join('');
+  }
+
+  // 构建 class → style 映射
+  const colorMap = {};
+  Object.keys(colorMapSource).forEach(k => {
+    const color = colorMapSource[k];
+    let style = `color:${color};`;
+    if (k === 'hljs-comment' || k === 'hljs-quote') style += 'font-style:italic;';
+    if (k === 'hljs-keyword' || k === 'hljs-selector-tag' || k === 'hljs-built_in') style += 'font-weight:bold;';
+    if (currentTheme === 'mono' && k === 'hljs-type') style += 'font-style:italic;';
+    colorMap[k] = style;
+  });
+
+  // class="hljs-xxx" → style="..."
+  const inline = highlighted.replace(
+    /<span class="([^"]+)">/g,
+    (match, classes) => {
+      const styles = classes.split(' ')
+        .map(c => colorMap[c])
+        .filter(Boolean)
+        .join('');
+      return `<span style="${styles}">`;
+    }
+  );
+
+  return inline;
+}
+
+/**
+ * 把高亮 HTML 按 \n 拆成多行，每行用 <tr><td> 行号 </td><td> 代码 </td></tr> 包裹。
+ * 这样在 Word / 剪贴板粘贴时能看到行号。
+ *
+ * 处理跨行 span：hljs 的输出中一个 span 可能跨越多行，
+ * 这里用栈追踪未闭合的 style，在行首重新开启。
+ *
+ * tagMode 参数：
+ *   'style' → 只处理 <span style="...">
+ *   'word'  → 处理 <font color="..."> / <b> / <i>
+ *
+ * darkMode 参数：
+ *   true  → 行号/边框使用深色背景适配（与预览区一致）
+ *   false → 白底适配（默认）
+ */
+function wrapWithLineNumbers(highlightedHtml, code, tagMode = 'style', darkMode = false) {
+  const lines = code.split('\n');
+  if (lines.length === 0) return highlightedHtml;
+
+  const openStyles = []; // 栈：保存当前未闭合的标签状态
+  const rows = [];
+  let currentLine = '';
+
+  let i = 0;
+  while (i < highlightedHtml.length) {
+    let matched = false;
+
+    // 处理 open tags
+    if (tagMode === 'style') {
+      const spanOpen = highlightedHtml.slice(i).match(/^<span style="([^"]*)">/);
+      if (spanOpen) {
+        const styleStr = spanOpen[1];
+        openStyles.push({ tag: 'span', style: styleStr });
+        currentLine += `<span style="${styleStr}">`;
+        i += spanOpen[0].length;
+        continue;
+      }
+    } else {
+      const fontOpen = highlightedHtml.slice(i).match(/^<font color="([^"]*)">/);
+      if (fontOpen) {
+        openStyles.push({ tag: 'font', color: fontOpen[1] });
+        currentLine += `<font color="${fontOpen[1]}">`;
+        i += fontOpen[0].length;
+        continue;
+      }
+      const bOpen = highlightedHtml.slice(i).match(/^<b>/);
+      if (bOpen) {
+        openStyles.push({ tag: 'b' });
+        currentLine += '<b>';
+        i += 3;
+        continue;
+      }
+      const iOpen = highlightedHtml.slice(i).match(/^<i>/);
+      if (iOpen) {
+        openStyles.push({ tag: 'i' });
+        currentLine += '<i>';
+        i += 3;
+        continue;
+      }
+    }
+
+    // 处理 close tags
+    const closeTags = tagMode === 'style'
+      ? ['</span>']
+      : ['</font>', '</b>', '</i>'];
+    for (const close of closeTags) {
+      if (highlightedHtml.slice(i, i + close.length) === close) {
+        openStyles.pop();
+        currentLine += close;
+        i += close.length;
+        matched = true;
+        break;
+      }
+    }
+    if (matched) continue;
+
+    // 处理 \n 行分隔
+    if (highlightedHtml[i] === '\n') {
+      let closing = '';
+      for (let s = openStyles.length - 1; s >= 0; s--) {
+        const tag = openStyles[s].tag;
+        if (tag === 'span') closing += '</span>';
+        else if (tag === 'font') closing += '</font>';
+        else if (tag === 'b') closing += '</b>';
+        else if (tag === 'i') closing += '</i>';
+      }
+      currentLine += closing;
+      rows.push(currentLine);
+      currentLine = '';
+      for (let s = 0; s < openStyles.length; s++) {
+        const st = openStyles[s];
+        if (st.tag === 'span') currentLine += `<span style="${st.style}">`;
+        else if (st.tag === 'font') currentLine += `<font color="${st.color}">`;
+        else if (st.tag === 'b') currentLine += '<b>';
+        else if (st.tag === 'i') currentLine += '<i>';
+      }
+      i += 1;
+      continue;
+    }
+
+    // 普通字符
+    currentLine += highlightedHtml[i];
+    i += 1;
+  }
+
+  // 最后一行
+  let closing = '';
+  for (let s = openStyles.length - 1; s >= 0; s--) {
+    const tag = openStyles[s].tag;
+    if (tag === 'span') closing += '</span>';
+    else if (tag === 'font') closing += '</font>';
+    else if (tag === 'b') closing += '</b>';
+    else if (tag === 'i') closing += '</i>';
+  }
+  currentLine += closing;
+  rows.push(currentLine);
+
+  // 根据 darkMode 选择行号/边框颜色
+  const lineNumColor = darkMode ? '#6a6a75' : '#999';
+  const borderColor = darkMode ? '#2a2a35' : '#e0e0e0';
+  const bgColor = darkMode ? '#101015' : '#ffffff';
+
+  // 构建表格行
+  const tableRows = rows.map((lineHtml, idx) => {
+    const lineNum = idx + 1;
+    const lineContent = lineHtml === '' ? '&nbsp;' : lineHtml;
+    return `<tr>
+<td style="padding:2px 12px 2px 0;text-align:right;color:${lineNumColor};font-family:'Consolas',monospace;font-size:10pt;border-right:1px solid ${borderColor};vertical-align:top;white-space:nowrap;user-select:none;">${lineNum}</td>
+<td style="padding:2px 0 2px 14px;vertical-align:top;white-space:pre-wrap;word-wrap:break-word;">${lineContent}</td>
+</tr>`;
+  }).join('');
+
+  return `<table style="border-collapse:collapse;width:100%;font-family:'Consolas','Courier New',monospace;font-size:10.5pt;color:${darkMode ? '#e4e4e7' : '#1e1e1e'};background:${bgColor};">${tableRows}</table>`;
+}
+
+/**
+ * 构建 .doc 完整文档 HTML（带 Word 命名空间）。
+ * 导出为白底，token 颜色使用与预览同色系、但在白底上可读的版本，
+ * 避免浅色/紫色在 Word 中看不清。
+ */
+function buildDocHtml() {
+  const code = editor.value || '';
+  const lang = LANGUAGES.find(l => l.value === currentLang) || LANGUAGES[0];
+  const themeName = currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1);
+  // 使用白底可读配色表
+  const inline = highlightToInlineSpans(code, 'style');
+  // 白底模式
+  const tableHtml = wrapWithLineNumbers(inline, code, 'style', false);
+
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>Lumen Code Export</title>
+<!--[if gte mso 9]>
+<xml>
+  <w:WordDocument>
+    <w:View>Normal</w:View>
+    <w:Zoom>100</w:Zoom>
+  </w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+  @page { margin: 2cm; }
+  body { font-family: 'Consolas', 'Courier New', monospace; font-size: 10.5pt; color: #1e1e1e; background: #ffffff; }
+  .code-box { background: #ffffff; padding: 12pt; border: 1px solid #e0e0e0; border-radius: 8px; line-height: 1.5; }
+  .title-bar { font-family: 'Segoe UI', sans-serif; color: #666; font-size: 9pt; margin-bottom: 8pt; padding-bottom: 6pt; border-bottom: 1px solid #e0e0e0; }
+  .title-bar b { color: #1565c0; }
+</style>
+</head>
+<body>
+  <div class="title-bar">Lumen · Code Highlight Studio &nbsp;|&nbsp; 语言: <b>${lang.name}</b> &nbsp;|&nbsp; 主题: <b>${themeName}</b> &nbsp;|&nbsp; 导出时间: ${new Date().toLocaleString('zh-CN')}</div>
+  <div class="code-box">${tableHtml}</div>
+</body>
+</html>`;
+
+  return html;
+}
+
+/* ---------- 下载 .doc 文件 ---------- */
+function downloadDoc() {
+  const code = editor.value || '';
+  if (!code.trim()) {
+    showToast('请先输入代码', 'error');
+    return;
+  }
+
+  const html = buildDocHtml();
+  const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const lang = LANGUAGES.find(l => l.value === currentLang);
+  a.href = url;
+  a.download = `lumen-code-${currentLang}-${Date.now()}.doc`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('已下载 .doc 文件');
+}
+
+/* ---------- 示例 / 清空 ---------- */
+function loadSample() {
+  const lang = currentLang;
+  const code = SAMPLES[lang] || SAMPLES.javascript;
+  if (!SAMPLES[lang]) {
+    setLanguage('javascript');
+    editor.value = SAMPLES.javascript;
+  } else {
+    editor.value = code;
+  }
+  render();
+  showToast(`已加载 ${lang} 示例代码`);
+}
+
+function clearAll() {
+  editor.value = '';
+  render();
+  editor.focus();
+  showToast('已清空');
+}
+
+/* ---------- Toast ---------- */
+function showToast(message, type = 'success') {
+  const t = document.createElement('div');
+  t.className = `toast ${type === 'error' ? 'error' : ''}`;
+  const iconSvg = type === 'error'
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+  t.innerHTML = `<span class="toast-icon">${iconSvg}</span><span>${message}</span>`;
+  toastContainer.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => t.remove(), 400);
+  }, 2400);
+}
+
+/* ---------- 事件绑定 ---------- */
+document.getElementById('btnDownload').addEventListener('click', downloadDoc);
+document.getElementById('btnSample').addEventListener('click', loadSample);
+document.getElementById('btnClear').addEventListener('click', clearAll);
+
+// 快捷键 Ctrl/Cmd + S 下载
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    downloadDoc();
+  }
+});
+
+/* ---------- 启动 ---------- */
+// 将语言下拉菜单移到 body 层级，避免面板 backdrop-filter 破坏 fixed 定位
+document.body.appendChild(langMenu);
+initLangMenu();
+editor.value = SAMPLES.javascript;
+render();
+editor.focus();
+// 后台并行预加载所有语言，切换时立即可用
+preloadAllLanguages();
+
+/* ---------- 主题切换涟漪效果 ---------- */
+// 切换主题时给预览区一个短暂的高光闪动
+const styleObserver = new MutationObserver(() => {
+  previewCode.animate(
+    [
+      { filter: 'brightness(1.4)', opacity: 0.6 },
+      { filter: 'brightness(1)', opacity: 1 }
+    ],
+    { duration: 500, easing: 'ease-out' }
+  );
+});
+styleObserver.observe(previewCode, { attributes: true, attributeFilter: ['data-theme'] });
+
+/* ---------- 鼠标追踪光效 ---------- */
+document.querySelectorAll('.panel, .topbar, .actionbar').forEach(el => {
+  const spotlight = el.querySelector('.spotlight');
+  if (!spotlight) return;
+  el.addEventListener('mousemove', (e) => {
+    const rect = el.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    el.style.setProperty('--mx', x + '%');
+    el.style.setProperty('--my', y + '%');
+  });
+});
+
+/* ---------- 主题芯片磁吸效果 ---------- */
+themeSwitcher.querySelectorAll('.theme-chip').forEach(chip => {
+  chip.addEventListener('mouseenter', () => {
+    chip.animate(
+      [
+        { transform: 'scale(1)', offset: 0 },
+        { transform: 'scale(1.06)', offset: 0.5 },
+        { transform: 'scale(1.02)', offset: 1 }
+      ],
+      { duration: 300, easing: 'ease-out' }
+    );
+  });
+});
+</script>
+
+</body>
+</html>
