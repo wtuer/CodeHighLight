@@ -53,6 +53,18 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  /* 切换明暗模式时临时禁用所有昂贵渲染，避免大面积重绘 */
+  .mode-switching,
+  .mode-switching *,
+  .mode-switching *::before,
+  .mode-switching *::after {
+    transition: none !important;
+    animation: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+  }
+
   html, body {
     height: 100%;
     overflow: hidden;
@@ -159,6 +171,7 @@
     grid-template-rows: auto 1fr auto;
     gap: 18px;
     padding: 22px 26px 22px;
+    contain: layout style paint;
   }
 
   /* ============ 顶部 ============ */
@@ -4852,7 +4865,12 @@ const modeLabel    = uiModeToggle.querySelector('.mode-label');
  * @param {'light'|'dark'} mode
  */
 function setUIMode(mode) {
+  // 1. 禁用所有昂贵渲染（过渡、动画、毛玻璃）
+  document.documentElement.classList.add('mode-switching');
+
+  // 2. 切换属性（浏览器批量处理，不立即绘制）
   document.documentElement.setAttribute('data-mode', mode);
+
   if (mode === 'light') {
     modeIconSun.style.display  = 'none';
     modeIconMoon.style.display = '';
@@ -4862,9 +4880,14 @@ function setUIMode(mode) {
     modeIconMoon.style.display = 'none';
     modeLabel.textContent = '浅色';
   }
-  // 预留持久化接口
   try { localStorage.setItem('ui-mode', mode); } catch (_) {}
   savePrefs();
+
+  // 3. 强制样式重算 + 下一帧恢复渲染
+  getComputedStyle(document.documentElement).opacity;
+  requestAnimationFrame(() => {
+    document.documentElement.classList.remove('mode-switching');
+  });
 }
 
 uiModeToggle.addEventListener('click', () => {
