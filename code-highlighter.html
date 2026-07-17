@@ -675,12 +675,14 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 20px;
+    min-height: 52px;
+    padding: 10px 20px;
     border-bottom: 1px solid var(--glass-border);
     background: rgba(0, 0, 0, 0.25);
     flex-shrink: 0;
     position: relative;
     z-index: 2;
+    box-sizing: border-box;
   }
 
   .panel-title {
@@ -1646,6 +1648,439 @@
   .preview-code[data-theme="vitesse"] .hljs-deletion { color: #CB7676; }
   .preview-code[data-theme="vitesse"] .hljs-addition { color: #80A665; }
 
+  /* ============ 浅色主题变体（跟随 UI 模式） ============ */
+
+  /* —— Lumen Light —— */
+  html[data-mode="light"] .preview-code[data-theme="lumen"],
+  body[data-mode="light"] .preview-code[data-theme="lumen"],
+  html[data-mode="light"] .preview-code[data-theme="lumen"] pre,
+  body[data-mode="light"] .preview-code[data-theme="lumen"] pre,
+  html[data-mode="light"] .preview-code[data-theme="lumen"] code,
+  body[data-mode="light"] .preview-code[data-theme="lumen"] code { background: #f8f9fa; }
+  html[data-mode="light"] .preview-code[data-theme="lumen"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="lumen"] .hljs { color: #1e1e28; }
+  html[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-comment,
+  body[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-comment { color: #8a8a93; }
+  html[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-keyword { color: #2563eb; }
+  html[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-string { color: #16a34a; }
+  html[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-number { color: #ea580c; }
+  html[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-title,
+  body[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-title { color: #b45309; }
+  html[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-type,
+  body[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-type { color: #be185d; }
+  html[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-variable,
+  body[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-variable { color: #4338ca; }
+  html[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-tag,
+  body[data-mode="light"] .preview-code[data-theme="lumen"] .hljs-tag { color: #2563eb; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="lumen"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="lumen"]) .preview-gutter { background: #f8f9fa; }
+
+  /* —— Aurora Light —— */
+  html[data-mode="light"] .preview-code[data-theme="aurora"],
+  body[data-mode="light"] .preview-code[data-theme="aurora"],
+  html[data-mode="light"] .preview-code[data-theme="aurora"] pre,
+  body[data-mode="light"] .preview-code[data-theme="aurora"] pre,
+  html[data-mode="light"] .preview-code[data-theme="aurora"] code,
+  body[data-mode="light"] .preview-code[data-theme="aurora"] code { background: #f0f7fa; }
+  html[data-mode="light"] .preview-code[data-theme="aurora"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="aurora"] .hljs { color: #1e2a3a; background: #f0f7fa; }
+  html[data-mode="light"] .preview-code[data-theme="aurora"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="aurora"] .hljs-keyword { color: #0369a1; }
+  html[data-mode="light"] .preview-code[data-theme="aurora"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="aurora"] .hljs-string { color: #0f766e; }
+  html[data-mode="light"] .preview-code[data-theme="aurora"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="aurora"] .hljs-number { color: #b45309; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="aurora"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="aurora"]) .preview-gutter { background: #f0f7fa; }
+
+  /* —— Synthwave Light —— */
+  html[data-mode="light"] .preview-code[data-theme="synthwave"],
+  body[data-mode="light"] .preview-code[data-theme="synthwave"],
+  html[data-mode="light"] .preview-code[data-theme="synthwave"] pre,
+  body[data-mode="light"] .preview-code[data-theme="synthwave"] pre,
+  html[data-mode="light"] .preview-code[data-theme="synthwave"] code,
+  body[data-mode="light"] .preview-code[data-theme="synthwave"] code { background: #fdf4ff; }
+  html[data-mode="light"] .preview-code[data-theme="synthwave"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="synthwave"] .hljs { color: #2d1b4e; background: #fdf4ff; }
+  html[data-mode="light"] .preview-code[data-theme="synthwave"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="synthwave"] .hljs-keyword { color: #a21caf; }
+  html[data-mode="light"] .preview-code[data-theme="synthwave"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="synthwave"] .hljs-string { color: #92400e; }
+  html[data-mode="light"] .preview-code[data-theme="synthwave"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="synthwave"] .hljs-number { color: #c2410c; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="synthwave"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="synthwave"]) .preview-gutter { background: #fdf4ff; }
+
+  /* —— Ember Light —— */
+  html[data-mode="light"] .preview-code[data-theme="ember"],
+  body[data-mode="light"] .preview-code[data-theme="ember"],
+  html[data-mode="light"] .preview-code[data-theme="ember"] pre,
+  body[data-mode="light"] .preview-code[data-theme="ember"] pre,
+  html[data-mode="light"] .preview-code[data-theme="ember"] code,
+  body[data-mode="light"] .preview-code[data-theme="ember"] code { background: #fff7ed; }
+  html[data-mode="light"] .preview-code[data-theme="ember"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="ember"] .hljs { color: #431407; background: #fff7ed; }
+  html[data-mode="light"] .preview-code[data-theme="ember"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="ember"] .hljs-keyword { color: #c2410c; }
+  html[data-mode="light"] .preview-code[data-theme="ember"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="ember"] .hljs-string { color: #b45309; }
+  html[data-mode="light"] .preview-code[data-theme="ember"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="ember"] .hljs-number { color: #ca8a04; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="ember"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="ember"]) .preview-gutter { background: #fff7ed; }
+
+  /* —— Forest Light —— */
+  html[data-mode="light"] .preview-code[data-theme="forest"],
+  body[data-mode="light"] .preview-code[data-theme="forest"],
+  html[data-mode="light"] .preview-code[data-theme="forest"] pre,
+  body[data-mode="light"] .preview-code[data-theme="forest"] pre,
+  html[data-mode="light"] .preview-code[data-theme="forest"] code,
+  body[data-mode="light"] .preview-code[data-theme="forest"] code { background: #f0fdf4; }
+  html[data-mode="light"] .preview-code[data-theme="forest"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="forest"] .hljs { color: #14310a; background: #f0fdf4; }
+  html[data-mode="light"] .preview-code[data-theme="forest"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="forest"] .hljs-keyword { color: #15803d; }
+  html[data-mode="light"] .preview-code[data-theme="forest"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="forest"] .hljs-string { color: #4d7c0f; }
+  html[data-mode="light"] .preview-code[data-theme="forest"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="forest"] .hljs-number { color: #ea580c; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="forest"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="forest"]) .preview-gutter { background: #f0fdf4; }
+
+  /* —— Tokyo Night Light —— */
+  html[data-mode="light"] .preview-code[data-theme="tokyo"],
+  body[data-mode="light"] .preview-code[data-theme="tokyo"],
+  html[data-mode="light"] .preview-code[data-theme="tokyo"] pre,
+  body[data-mode="light"] .preview-code[data-theme="tokyo"] pre,
+  html[data-mode="light"] .preview-code[data-theme="tokyo"] code,
+  body[data-mode="light"] .preview-code[data-theme="tokyo"] code { background: #f0f4ff; }
+  html[data-mode="light"] .preview-code[data-theme="tokyo"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="tokyo"] .hljs { color: #1e2a4a; background: #f0f4ff; }
+  html[data-mode="light"] .preview-code[data-theme="tokyo"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="tokyo"] .hljs-keyword { color: #2563eb; }
+  html[data-mode="light"] .preview-code[data-theme="tokyo"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="tokyo"] .hljs-string { color: #16a34a; }
+  html[data-mode="light"] .preview-code[data-theme="tokyo"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="tokyo"] .hljs-number { color: #ea580c; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="tokyo"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="tokyo"]) .preview-gutter { background: #f0f4ff; }
+
+  /* —— Dracula Light —— */
+  html[data-mode="light"] .preview-code[data-theme="dracula"],
+  body[data-mode="light"] .preview-code[data-theme="dracula"],
+  html[data-mode="light"] .preview-code[data-theme="dracula"] pre,
+  body[data-mode="light"] .preview-code[data-theme="dracula"] pre,
+  html[data-mode="light"] .preview-code[data-theme="dracula"] code,
+  body[data-mode="light"] .preview-code[data-theme="dracula"] code { background: #fdf4ff; }
+  html[data-mode="light"] .preview-code[data-theme="dracula"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="dracula"] .hljs { color: #2d1b4e; background: #fdf4ff; }
+  html[data-mode="light"] .preview-code[data-theme="dracula"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="dracula"] .hljs-keyword { color: #a21caf; }
+  html[data-mode="light"] .preview-code[data-theme="dracula"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="dracula"] .hljs-string { color: #854d0e; }
+  html[data-mode="light"] .preview-code[data-theme="dracula"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="dracula"] .hljs-number { color: #7c3aed; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="dracula"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="dracula"]) .preview-gutter { background: #fdf4ff; }
+
+  /* —— Nordic Light —— */
+  html[data-mode="light"] .preview-code[data-theme="nordic"],
+  body[data-mode="light"] .preview-code[data-theme="nordic"],
+  html[data-mode="light"] .preview-code[data-theme="nordic"] pre,
+  body[data-mode="light"] .preview-code[data-theme="nordic"] pre,
+  html[data-mode="light"] .preview-code[data-theme="nordic"] code,
+  body[data-mode="light"] .preview-code[data-theme="nordic"] code { background: #f0f4f8; }
+  html[data-mode="light"] .preview-code[data-theme="nordic"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="nordic"] .hljs { color: #1e2a3a; background: #f0f4f8; }
+  html[data-mode="light"] .preview-code[data-theme="nordic"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="nordic"] .hljs-keyword { color: #0369a1; }
+  html[data-mode="light"] .preview-code[data-theme="nordic"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="nordic"] .hljs-string { color: #15803d; }
+  html[data-mode="light"] .preview-code[data-theme="nordic"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="nordic"] .hljs-number { color: #7c3aed; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="nordic"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="nordic"]) .preview-gutter { background: #f0f4f8; }
+
+  /* —— Solarized Light —— */
+  html[data-mode="light"] .preview-code[data-theme="solar"],
+  body[data-mode="light"] .preview-code[data-theme="solar"],
+  html[data-mode="light"] .preview-code[data-theme="solar"] pre,
+  body[data-mode="light"] .preview-code[data-theme="solar"] pre,
+  html[data-mode="light"] .preview-code[data-theme="solar"] code,
+  body[data-mode="light"] .preview-code[data-theme="solar"] code { background: #fdf6e3; }
+  html[data-mode="light"] .preview-code[data-theme="solar"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="solar"] .hljs { color: #1a365d; background: #fdf6e3; }
+  html[data-mode="light"] .preview-code[data-theme="solar"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="solar"] .hljs-keyword { color: #4d7c0f; }
+  html[data-mode="light"] .preview-code[data-theme="solar"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="solar"] .hljs-string { color: #0f766e; }
+  html[data-mode="light"] .preview-code[data-theme="solar"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="solar"] .hljs-number { color: #be185d; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="solar"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="solar"]) .preview-gutter { background: #fdf6e3; }
+
+  /* —— Cyberpunk Light —— */
+  html[data-mode="light"] .preview-code[data-theme="cyber"],
+  body[data-mode="light"] .preview-code[data-theme="cyber"],
+  html[data-mode="light"] .preview-code[data-theme="cyber"] pre,
+  body[data-mode="light"] .preview-code[data-theme="cyber"] pre,
+  html[data-mode="light"] .preview-code[data-theme="cyber"] code,
+  body[data-mode="light"] .preview-code[data-theme="cyber"] code { background: #fdf4ff; }
+  html[data-mode="light"] .preview-code[data-theme="cyber"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="cyber"] .hljs { color: #1e1b2e; background: #fdf4ff; }
+  html[data-mode="light"] .preview-code[data-theme="cyber"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="cyber"] .hljs-keyword { color: #a21caf; }
+  html[data-mode="light"] .preview-code[data-theme="cyber"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="cyber"] .hljs-string { color: #854d0e; }
+  html[data-mode="light"] .preview-code[data-theme="cyber"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="cyber"] .hljs-number { color: #0369a1; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="cyber"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="cyber"]) .preview-gutter { background: #fdf4ff; }
+
+  /* —— Rose Pine Light —— */
+  html[data-mode="light"] .preview-code[data-theme="rosepine"],
+  body[data-mode="light"] .preview-code[data-theme="rosepine"],
+  html[data-mode="light"] .preview-code[data-theme="rosepine"] pre,
+  body[data-mode="light"] .preview-code[data-theme="rosepine"] pre,
+  html[data-mode="light"] .preview-code[data-theme="rosepine"] code,
+  body[data-mode="light"] .preview-code[data-theme="rosepine"] code { background: #faf4f8; }
+  html[data-mode="light"] .preview-code[data-theme="rosepine"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="rosepine"] .hljs { color: #2e1b3a; background: #faf4f8; }
+  html[data-mode="light"] .preview-code[data-theme="rosepine"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="rosepine"] .hljs-keyword { color: #7e1f8a; }
+  html[data-mode="light"] .preview-code[data-theme="rosepine"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="rosepine"] .hljs-string { color: #9f1239; }
+  html[data-mode="light"] .preview-code[data-theme="rosepine"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="rosepine"] .hljs-number { color: #b45309; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="rosepine"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="rosepine"]) .preview-gutter { background: #faf4f8; }
+
+  /* —— Mono Light —— */
+  html[data-mode="light"] .preview-code[data-theme="mono"],
+  body[data-mode="light"] .preview-code[data-theme="mono"],
+  html[data-mode="light"] .preview-code[data-theme="mono"] pre,
+  body[data-mode="light"] .preview-code[data-theme="mono"] pre,
+  html[data-mode="light"] .preview-code[data-theme="mono"] code,
+  body[data-mode="light"] .preview-code[data-theme="mono"] code { background: #f9fafb; }
+  html[data-mode="light"] .preview-code[data-theme="mono"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="mono"] .hljs { color: #111827; background: #f9fafb; }
+  html[data-mode="light"] .preview-code[data-theme="mono"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="mono"] .hljs-keyword { color: #000000; font-weight: 700; }
+  html[data-mode="light"] .preview-code[data-theme="mono"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="mono"] .hljs-string { color: #374151; }
+  html[data-mode="light"] .preview-code[data-theme="mono"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="mono"] .hljs-number { color: #6b7280; }
+  html[data-mode="light"] .preview-code[data-theme="mono"] .hljs-type,
+  body[data-mode="light"] .preview-code[data-theme="mono"] .hljs-type { color: #1f2937; font-style: italic; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="mono"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="mono"]) .preview-gutter { background: #f9fafb; }
+
+  /* —— Gruvbox Light —— */
+  html[data-mode="light"] .preview-code[data-theme="gruvbox"],
+  body[data-mode="light"] .preview-code[data-theme="gruvbox"],
+  html[data-mode="light"] .preview-code[data-theme="gruvbox"] pre,
+  body[data-mode="light"] .preview-code[data-theme="gruvbox"] pre,
+  html[data-mode="light"] .preview-code[data-theme="gruvbox"] code,
+  body[data-mode="light"] .preview-code[data-theme="gruvbox"] code { background: #fdf8e8; }
+  html[data-mode="light"] .preview-code[data-theme="gruvbox"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="gruvbox"] .hljs { color: #3c2c1e; background: #fdf8e8; }
+  html[data-mode="light"] .preview-code[data-theme="gruvbox"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="gruvbox"] .hljs-keyword { color: #b91c1c; }
+  html[data-mode="light"] .preview-code[data-theme="gruvbox"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="gruvbox"] .hljs-string { color: #4d7c0f; }
+  html[data-mode="light"] .preview-code[data-theme="gruvbox"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="gruvbox"] .hljs-number { color: #7e1f8a; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="gruvbox"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="gruvbox"]) .preview-gutter { background: #fdf8e8; }
+
+  /* —— One Dark Light —— */
+  html[data-mode="light"] .preview-code[data-theme="onedark"],
+  body[data-mode="light"] .preview-code[data-theme="onedark"],
+  html[data-mode="light"] .preview-code[data-theme="onedark"] pre,
+  body[data-mode="light"] .preview-code[data-theme="onedark"] pre,
+  html[data-mode="light"] .preview-code[data-theme="onedark"] code,
+  body[data-mode="light"] .preview-code[data-theme="onedark"] code { background: #fafafa; }
+  html[data-mode="light"] .preview-code[data-theme="onedark"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="onedark"] .hljs { color: #282c34; background: #fafafa; }
+  html[data-mode="light"] .preview-code[data-theme="onedark"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="onedark"] .hljs-keyword { color: #a21caf; }
+  html[data-mode="light"] .preview-code[data-theme="onedark"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="onedark"] .hljs-string { color: #16a34a; }
+  html[data-mode="light"] .preview-code[data-theme="onedark"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="onedark"] .hljs-number { color: #ca8a04; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="onedark"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="onedark"]) .preview-gutter { background: #fafafa; }
+
+  /* —— Monokai Light —— */
+  html[data-mode="light"] .preview-code[data-theme="monokai"],
+  body[data-mode="light"] .preview-code[data-theme="monokai"],
+  html[data-mode="light"] .preview-code[data-theme="monokai"] pre,
+  body[data-mode="light"] .preview-code[data-theme="monokai"] pre,
+  html[data-mode="light"] .preview-code[data-theme="monokai"] code,
+  body[data-mode="light"] .preview-code[data-theme="monokai"] code { background: #fdfcfa; }
+  html[data-mode="light"] .preview-code[data-theme="monokai"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="monokai"] .hljs { color: #272822; background: #fdfcfa; }
+  html[data-mode="light"] .preview-code[data-theme="monokai"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="monokai"] .hljs-keyword { color: #be121c; }
+  html[data-mode="light"] .preview-code[data-theme="monokai"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="monokai"] .hljs-string { color: #854d0e; }
+  html[data-mode="light"] .preview-code[data-theme="monokai"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="monokai"] .hljs-number { color: #7c3aed; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="monokai"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="monokai"]) .preview-gutter { background: #fdfcfa; }
+
+  /* —— Material Light —— */
+  html[data-mode="light"] .preview-code[data-theme="material"],
+  body[data-mode="light"] .preview-code[data-theme="material"],
+  html[data-mode="light"] .preview-code[data-theme="material"] pre,
+  body[data-mode="light"] .preview-code[data-theme="material"] pre,
+  html[data-mode="light"] .preview-code[data-theme="material"] code,
+  body[data-mode="light"] .preview-code[data-theme="material"] code { background: #f0f9ff; }
+  html[data-mode="light"] .preview-code[data-theme="material"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="material"] .hljs { color: #1e293b; background: #f0f9ff; }
+  html[data-mode="light"] .preview-code[data-theme="material"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="material"] .hljs-keyword { color: #7c3aed; }
+  html[data-mode="light"] .preview-code[data-theme="material"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="material"] .hljs-string { color: #16a34a; }
+  html[data-mode="light"] .preview-code[data-theme="material"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="material"] .hljs-number { color: #ea580c; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="material"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="material"]) .preview-gutter { background: #f0f9ff; }
+
+  /* —— Catppuccin Light —— */
+  html[data-mode="light"] .preview-code[data-theme="catppuccin"],
+  body[data-mode="light"] .preview-code[data-theme="catppuccin"],
+  html[data-mode="light"] .preview-code[data-theme="catppuccin"] pre,
+  body[data-mode="light"] .preview-code[data-theme="catppuccin"] pre,
+  html[data-mode="light"] .preview-code[data-theme="catppuccin"] code,
+  body[data-mode="light"] .preview-code[data-theme="catppuccin"] code { background: #fdf4ff; }
+  html[data-mode="light"] .preview-code[data-theme="catppuccin"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="catppuccin"] .hljs { color: #2e1b3a; background: #fdf4ff; }
+  html[data-mode="light"] .preview-code[data-theme="catppuccin"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="catppuccin"] .hljs-keyword { color: #7e1f8a; }
+  html[data-mode="light"] .preview-code[data-theme="catppuccin"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="catppuccin"] .hljs-string { color: #16a34a; }
+  html[data-mode="light"] .preview-code[data-theme="catppuccin"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="catppuccin"] .hljs-number { color: #ea580c; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="catppuccin"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="catppuccin"]) .preview-gutter { background: #fdf4ff; }
+
+  /* —— GitHub Light —— */
+  html[data-mode="light"] .preview-code[data-theme="github"],
+  body[data-mode="light"] .preview-code[data-theme="github"],
+  html[data-mode="light"] .preview-code[data-theme="github"] pre,
+  body[data-mode="light"] .preview-code[data-theme="github"] pre,
+  html[data-mode="light"] .preview-code[data-theme="github"] code,
+  body[data-mode="light"] .preview-code[data-theme="github"] code { background: #ffffff; }
+  html[data-mode="light"] .preview-code[data-theme="github"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="github"] .hljs { color: #24292e; background: #ffffff; }
+  html[data-mode="light"] .preview-code[data-theme="github"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="github"] .hljs-keyword { color: #cf222e; }
+  html[data-mode="light"] .preview-code[data-theme="github"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="github"] .hljs-string { color: #0a3069; }
+  html[data-mode="light"] .preview-code[data-theme="github"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="github"] .hljs-number { color: #0550ae; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="github"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="github"]) .preview-gutter { background: #ffffff; }
+
+  /* —— Horizon Light —— */
+  html[data-mode="light"] .preview-code[data-theme="horizon"],
+  body[data-mode="light"] .preview-code[data-theme="horizon"],
+  html[data-mode="light"] .preview-code[data-theme="horizon"] pre,
+  body[data-mode="light"] .preview-code[data-theme="horizon"] pre,
+  html[data-mode="light"] .preview-code[data-theme="horizon"] code,
+  body[data-mode="light"] .preview-code[data-theme="horizon"] code { background: #fff5f3; }
+  html[data-mode="light"] .preview-code[data-theme="horizon"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="horizon"] .hljs { color: #2e1b2a; background: #fff5f3; }
+  html[data-mode="light"] .preview-code[data-theme="horizon"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="horizon"] .hljs-keyword { color: #8b3ea0; }
+  html[data-mode="light"] .preview-code[data-theme="horizon"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="horizon"] .hljs-string { color: #d4585a; }
+  html[data-mode="light"] .preview-code[data-theme="horizon"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="horizon"] .hljs-number { color: #d84315; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="horizon"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="horizon"]) .preview-gutter { background: #fff5f3; }
+
+  /* —— Night Owl Light —— */
+  html[data-mode="light"] .preview-code[data-theme="nightowl"],
+  body[data-mode="light"] .preview-code[data-theme="nightowl"],
+  html[data-mode="light"] .preview-code[data-theme="nightowl"] pre,
+  body[data-mode="light"] .preview-code[data-theme="nightowl"] pre,
+  html[data-mode="light"] .preview-code[data-theme="nightowl"] code,
+  body[data-mode="light"] .preview-code[data-theme="nightowl"] code { background: #f0f4ff; }
+  html[data-mode="light"] .preview-code[data-theme="nightowl"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="nightowl"] .hljs { color: #1e2a4a; background: #f0f4ff; }
+  html[data-mode="light"] .preview-code[data-theme="nightowl"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="nightowl"] .hljs-keyword { color: #7c3aed; }
+  html[data-mode="light"] .preview-code[data-theme="nightowl"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="nightowl"] .hljs-string { color: #92400e; }
+  html[data-mode="light"] .preview-code[data-theme="nightowl"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="nightowl"] .hljs-number { color: #c2410c; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="nightowl"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="nightowl"]) .preview-gutter { background: #f0f4ff; }
+
+  /* —— Ayu Light —— */
+  html[data-mode="light"] .preview-code[data-theme="ayu"],
+  body[data-mode="light"] .preview-code[data-theme="ayu"],
+  html[data-mode="light"] .preview-code[data-theme="ayu"] pre,
+  body[data-mode="light"] .preview-code[data-theme="ayu"] pre,
+  html[data-mode="light"] .preview-code[data-theme="ayu"] code,
+  body[data-mode="light"] .preview-code[data-theme="ayu"] code { background: #fdf8f0; }
+  html[data-mode="light"] .preview-code[data-theme="ayu"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="ayu"] .hljs { color: #2e2a1e; background: #fdf8f0; }
+  html[data-mode="light"] .preview-code[data-theme="ayu"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="ayu"] .hljs-keyword { color: #c2410c; }
+  html[data-mode="light"] .preview-code[data-theme="ayu"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="ayu"] .hljs-string { color: #4d7c0f; }
+  html[data-mode="light"] .preview-code[data-theme="ayu"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="ayu"] .hljs-number { color: #7e1f8a; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="ayu"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="ayu"]) .preview-gutter { background: #fdf8f0; }
+
+  /* —— Shades of Purple Light —— */
+  html[data-mode="light"] .preview-code[data-theme="sop"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="sop"] .hljs { color: #1e1b4e; background: #f5f3ff; }
+  html[data-mode="light"] .preview-code[data-theme="sop"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="sop"] .hljs-keyword { color: #ea580c; }
+  html[data-mode="light"] .preview-code[data-theme="sop"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="sop"] .hljs-string { color: #4d7c0f; }
+  html[data-mode="light"] .preview-code[data-theme="sop"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="sop"] .hljs-number { color: #be121c; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="sop"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="sop"]) .preview-gutter { background: #f5f3ff; }
+
+  /* —— Palenight Light —— */
+  html[data-mode="light"] .preview-code[data-theme="palenight"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="palenight"] .hljs { color: #1e1b3a; background: #f5f3ff; }
+  html[data-mode="light"] .preview-code[data-theme="palenight"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="palenight"] .hljs-keyword { color: #7c3aed; }
+  html[data-mode="light"] .preview-code[data-theme="palenight"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="palenight"] .hljs-string { color: #16a34a; }
+  html[data-mode="light"] .preview-code[data-theme="palenight"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="palenight"] .hljs-number { color: #ea580c; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="palenight"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="palenight"]) .preview-gutter { background: #f5f3ff; }
+
+  /* —— Vitesse Light —— */
+  html[data-mode="light"] .preview-code[data-theme="vitesse"],
+  body[data-mode="light"] .preview-code[data-theme="vitesse"],
+  html[data-mode="light"] .preview-code[data-theme="vitesse"] pre,
+  body[data-mode="light"] .preview-code[data-theme="vitesse"] pre,
+  html[data-mode="light"] .preview-code[data-theme="vitesse"] code,
+  body[data-mode="light"] .preview-code[data-theme="vitesse"] code { background: #fdfcfa; }
+  html[data-mode="light"] .preview-code[data-theme="vitesse"] .hljs,
+  body[data-mode="light"] .preview-code[data-theme="vitesse"] .hljs { color: #2e2a1e; background: #fdfcfa; }
+  html[data-mode="light"] .preview-code[data-theme="vitesse"] .hljs-keyword,
+  body[data-mode="light"] .preview-code[data-theme="vitesse"] .hljs-keyword { color: #b91c1c; }
+  html[data-mode="light"] .preview-code[data-theme="vitesse"] .hljs-string,
+  body[data-mode="light"] .preview-code[data-theme="vitesse"] .hljs-string { color: #9a3412; }
+  html[data-mode="light"] .preview-code[data-theme="vitesse"] .hljs-number,
+  body[data-mode="light"] .preview-code[data-theme="vitesse"] .hljs-number { color: #0f766e; }
+  html[data-mode="light"] .panel-preview:has(.preview-code[data-theme="vitesse"]) .preview-gutter,
+  body[data-mode="light"] .panel-preview:has(.preview-code[data-theme="vitesse"]) .preview-gutter { background: #fdfcfa; }
 
   /* ============ 底部操作栏 ============ */
   .actionbar {
@@ -1880,9 +2315,199 @@
     outline-offset: 2px;
     box-shadow: 0 0 0 4px rgba(110, 168, 255, 0.15);
   }
+
+  /* ============ 浅色模式（仅影响壳层 UI，不触碰 .preview-code[data-theme]） ============ */
+  html[data-mode="light"],
+  body[data-mode="light"] {
+    --bg-0: #f4f5f7;
+    --bg-1: #ebebef;
+    --bg-2: #e0e1e6;
+
+    --glass-bg: rgba(255, 255, 255, 0.62);
+    --glass-bg-strong: rgba(255, 255, 255, 0.78);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-border-strong: rgba(0, 0, 0, 0.14);
+    --glass-highlight: rgba(255, 255, 255, 0.85);
+    --glass-inner-glow: rgba(255, 255, 255, 0.7);
+
+    --text-1: #1a1a22;
+    --text-2: #55555f;
+    --text-3: #8a8a95;
+    --text-4: #b0b0ba;
+
+    --accent: #3b7dff;
+    --accent-soft: rgba(59, 125, 255, 0.12);
+    --accent-glow: rgba(59, 125, 255, 0.25);
+
+    --shadow-deep: 0 20px 60px -16px rgba(0, 0, 0, 0.12), 0 8px 24px -8px rgba(0, 0, 0, 0.08);
+    --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+    --shadow-float: 0 8px 24px -6px rgba(0, 0, 0, 0.12), 0 2px 6px -2px rgba(0, 0, 0, 0.06);
+  }
+
+  /* 浅色模式下极光背景淡化 */
+  html[data-mode="light"] .aurora::before,
+  body[data-mode="light"] .aurora::before {
+    opacity: 0.35;
+  }
+  html[data-mode="light"] .aurora .layer-2,
+  body[data-mode="light"] .aurora .layer-2 {
+    opacity: 0.25;
+  }
+  html[data-mode="light"] .aurora .layer-3,
+  body[data-mode="light"] .aurora .layer-3 {
+    opacity: 0.15;
+  }
+  html[data-mode="light"] .aurora::after,
+  body[data-mode="light"] .aurora::after {
+    background:
+      radial-gradient(60% 60% at 50% 50%, transparent 40%, rgba(255, 255, 255, 0.45) 100%);
+    opacity: 0.7;
+  }
+
+  /* 浅色模式下 topbar 顶部高光线调整 */
+  html[data-mode="light"] .topbar::before,
+  body[data-mode="light"] .topbar::before {
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(59, 125, 255, 0.25) 30%,
+      rgba(167, 139, 250, 0.30) 50%,
+      rgba(94, 224, 208, 0.25) 70%,
+      transparent 100%
+    );
+  }
+
+  /* 浅色模式下硬编码的白色悬浮色改为暗色 */
+  html[data-mode="light"] .theme-chip:hover,
+  body[data-mode="light"] .theme-chip:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+  html[data-mode="light"] .theme-chip.active,
+  body[data-mode="light"] .theme-chip.active {
+    background: rgba(0, 0, 0, 0.07);
+  }
+  html[data-mode="light"] .lang-trigger:hover,
+  body[data-mode="light"] .lang-trigger:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+  html[data-mode="light"] .lang-option:hover,
+  body[data-mode="light"] .lang-option:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  html[data-mode="light"] .btn:hover,
+  body[data-mode="light"] .btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+  html[data-mode="light"] .btn-ghost:hover,
+  body[data-mode="light"] .btn-ghost:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  /* 浅色模式下语言下拉菜单 */
+  html[data-mode="light"] .lang-menu,
+  body[data-mode="light"] .lang-menu {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: var(--glass-border-strong);
+  }
+  html[data-mode="light"] .lang-menu::-webkit-scrollbar-thumb,
+  body[data-mode="light"] .lang-menu::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.12);
+  }
+
+  /* 浅色模式下 preview 背景由各浅色主题变体控制 */
+  html[data-mode="light"] .preview-code code,
+  body[data-mode="light"] .preview-code code {
+    background: transparent;
+  }
+
+  /* 浅色模式下编辑器行号栏 */
+  html[data-mode="light"] .editor-gutter,
+  body[data-mode="light"] .editor-gutter {
+    background: #eef0f3;
+    color: #a0a4ab;
+    border-right-color: #dde0e6;
+  }
+
+  /* 浅色模式下预览行号栏（基础样式，各浅色主题可覆盖） */
+  html[data-mode="light"] .preview-gutter,
+  body[data-mode="light"] .preview-gutter {
+    background: #eef0f3;
+    color: #a0a4ab;
+    border-right-color: #dde0e6;
+  }
+
+  /* 浅色模式下面板边框 */
+  html[data-mode="light"] .panel,
+  body[data-mode="light"] .panel {
+    border-color: #dde0e6;
+  }
+  html[data-mode="light"] .topbar,
+  body[data-mode="light"] .topbar {
+    border-color: #dde0e6;
+  }
+  html[data-mode="light"] .actionbar,
+  body[data-mode="light"] .actionbar {
+    border-color: #dde0e6;
+  }
+
+  /* ============ 拖拽导入覆盖层 ============ */
+  .drag-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(4, 4, 6, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    pointer-events: none;
+  }
+  .drag-overlay.visible {
+    display: flex;
+  }
+  .drag-overlay-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 48px 64px;
+    border: 2px dashed var(--glass-border-strong);
+    border-radius: var(--radius-lg);
+    background: var(--glass-bg-strong);
+    box-shadow: var(--shadow-glass);
+    animation: dragPulse 2s ease-in-out infinite;
+  }
+  .drag-overlay-icon {
+    width: 56px;
+    height: 56px;
+    color: var(--accent);
+    opacity: 0.85;
+  }
+  .drag-overlay-text {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-2);
+    letter-spacing: 0.04em;
+  }
+  @keyframes dragPulse {
+    0%, 100% { border-color: var(--glass-border-strong); }
+    50%     { border-color: var(--accent); }
+  }
 </style>
 </head>
 <body>
+
+<!-- 拖拽导入覆盖层 -->
+<div class="drag-overlay" id="dragOverlay">
+  <div class="drag-overlay-box">
+    <svg class="drag-overlay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="17 8 12 3 7 8"/>
+      <line x1="12" y1="3" x2="12" y2="15"/>
+    </svg>
+    <span class="drag-overlay-text">拖入文件导入</span>
+  </div>
+</div>
 
 <div class="aurora">
   <div class="layer-2"></div>
@@ -2067,6 +2692,16 @@
   <footer class="actionbar">
     <div class="spotlight"></div>
     <div class="action-group">
+      <button class="btn ui-mode-toggle" id="uiModeToggle" title="切换浅色/暗色界面">
+        <svg class="mode-icon-sun" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="mode-icon-moon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span class="mode-label">浅色</span>
+      </button>
+      <input type="file" id="fileImportInput" style="display:none;" />
+      <button class="btn" id="btnImportFile" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 12 15 15"></polyline></svg>
+        选择文件
+      </button>
       <button class="btn" id="btnDownload" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         导出 Word
@@ -2136,6 +2771,94 @@ const LANGUAGES = [
   { name: 'Dockerfile',   value: 'dockerfile', ext: 'Dockerfile'},
   { name: 'Plain Text',   value: 'plaintext',  ext: '.txt'  },
 ];
+
+// 文件后缀 → LANGUAGES 语言值映射表
+const EXTENSION_LANG_MAP = {
+  '.js':       'javascript',
+  '.mjs':      'javascript',
+  '.cjs':      'javascript',
+  '.jsx':      'javascript',
+  '.ts':       'typescript',
+  '.tsx':      'typescript',
+  '.py':       'python',
+  '.pyw':      'python',
+  '.pyi':      'python',
+  '.java':     'java',
+  '.c':        'c',
+  '.h':        'c',
+  '.cpp':      'cpp',
+  '.cxx':      'cpp',
+  '.cc':       'cpp',
+  '.hpp':      'cpp',
+  '.hxx':      'cpp',
+  '.hh':       'cpp',
+  '.cs':       'csharp',
+  '.go':       'go',
+  '.rs':       'rust',
+  '.rb':       'ruby',
+  '.erb':      'ruby',
+  '.php':      'php',
+  '.phtml':    'php',
+  '.swift':    'swift',
+  '.kt':       'kotlin',
+  '.kts':      'kotlin',
+  '.html':     'xml',
+  '.htm':      'xml',
+  '.xml':      'xml',
+  '.xhtml':    'xml',
+  '.svg':      'xml',
+  '.vue':      'xml',
+  '.svelte':   'xml',
+  '.css':      'css',
+  '.scss':     'css',
+  '.sass':     'css',
+  '.less':     'css',
+  '.json':     'json',
+  '.jsonc':    'json',
+  '.json5':    'json',
+  '.yaml':     'yaml',
+  '.yml':      'yaml',
+  '.toml':     'yaml',
+  '.md':       'markdown',
+  '.markdown': 'markdown',
+  '.mdx':      'markdown',
+  '.sql':      'sql',
+  '.sh':       'bash',
+  '.bash':     'bash',
+  '.zsh':      'bash',
+  '.fish':     'bash',
+  '.ksh':      'bash',
+  '.bat':      'powershell',
+  '.cmd':      'powershell',
+  '.ps1':      'powershell',
+  '.dart':     'dart',
+  '.lua':      'lua',
+  '.scala':    'scala',
+  '.sc':       'scala',
+  '.sbt':      'scala',
+  '.r':        'r',
+  '.R':        'r',
+  '.m':        'matlab',
+  '.jl':       'julia',
+  '.hs':       'haskell',
+  '.lhs':      'haskell',
+  '.pl':       'perl',
+  '.pm':       'perl',
+  '.t':        'perl',
+  '.fs':       'fsharp',
+  '.fsi':      'fsharp',
+  '.fsx':      'fsharp',
+  '.groovy':   'groovy',
+  '.gradle':   'groovy',
+  '.gvy':      'groovy',
+  '.dockerfile':'dockerfile',
+  '.txt':      'plaintext',
+  '.ini':      'plaintext',
+  '.cfg':      'plaintext',
+  '.conf':     'plaintext',
+  '.log':      'plaintext',
+  '.env':      'plaintext',
+};
 
 // 示例代码集
 const SAMPLES = {
@@ -2697,6 +3420,18 @@ const loadedLangs = new Set();
 // 正在加载中的语言包 Promise
 const loadingLangs = new Map();
 
+/* ---------- 偏好持久化 ---------- */
+const PREFS_KEY = 'highlight-studio-prefs';
+function savePrefs() {
+  try {
+    localStorage.setItem(PREFS_KEY, JSON.stringify({
+      currentLang: currentLang,
+      uiMode: document.documentElement.getAttribute('data-mode') || 'dark',
+      currentTheme: currentTheme
+    }));
+  } catch (_) {}
+}
+
 // 内置在 highlight.min.js 中的常用语言（无需动态加载）
 const BUILTIN_LANGS = new Set([
   'javascript', 'typescript', 'python', 'java', 'c', 'cpp', 'csharp', 'go',
@@ -3025,6 +3760,57 @@ function setLanguage(value) {
   });
   // 确保该语言已加载，再渲染
   ensureLanguage(value).then(() => render());
+  savePrefs();
+}
+
+/**
+ * 根据文件名和代码内容检测语言并同步语言选择器。
+ * 优先通过文件后缀匹配 EXTENSION_LANG_MAP，
+ * 未命中时使用 hljs.highlightAuto 推断语言。
+ */
+function detectAndSetLanguageFromFilename(filename, code) {
+  // 1. 提取文件后缀（统一小写，同时保留原始后缀用于大小写敏感映射如 .R）
+  const lastDot = filename.lastIndexOf('.');
+  const extLower = lastDot >= 0 ? filename.slice(lastDot).toLowerCase() : '';
+  const extRaw   = lastDot >= 0 ? filename.slice(lastDot) : '';
+
+  // 2. 优先匹配后缀映射表（先尝试原始后缀，再尝试小写后缀）
+  const mapped = EXTENSION_LANG_MAP[extRaw] || EXTENSION_LANG_MAP[extLower];
+  if (mapped) {
+    setLanguage(mapped);
+    return;
+  }
+
+  // 3. 特殊文件名匹配（无后缀的常见文件）
+  const basename = filename.toLowerCase();
+  if (basename === 'dockerfile') { setLanguage('dockerfile'); return; }
+  if (basename === 'makefile')   { setLanguage('bash'); return; }
+  if (basename === 'cmakelists.txt') { setLanguage('plaintext'); return; }
+
+  // 4. 后缀未命中，使用 hljs.highlightAuto 推断
+  try {
+    const result = hljs.highlightAuto(code);
+    if (result && result.language) {
+      const detected = result.language;
+      // 确保识别到的语言在 LANGUAGES 列表中
+      const exists = LANGUAGES.some(l => l.value === detected);
+      if (exists) {
+        setLanguage(detected);
+        return;
+      }
+      // 尝试用 hljs 别名解析（如 "xml" 对应 html 等）
+      const langDef = hljs.getLanguage(detected);
+      if (langDef && langDef.aliases) {
+        for (const alias of langDef.aliases) {
+          const match = LANGUAGES.find(l => l.value === alias);
+          if (match) { setLanguage(match.value); return; }
+        }
+      }
+    }
+  } catch (_) { /* highlightAuto 静默失败 */ }
+
+  // 5. 均未命中，保持当前语言，提示用户
+  showToast('未能识别语言，已保持当前设置', 'error');
 }
 
 /**
@@ -3106,6 +3892,7 @@ function setTheme(theme) {
   themeSwitcher.querySelectorAll('.theme-chip').forEach(c => {
     c.classList.toggle('active', c.dataset.theme === theme);
   });
+  savePrefs();
 }
 
 themeSwitcher.querySelectorAll('.theme-chip').forEach(chip => {
@@ -3516,9 +4303,12 @@ function highlightToInlineSpans(code, format = 'preview') {
     }
   }
 
-  // 根据模式选择配色表：preview 模式与右侧预览完全一致；style/word 模式用白底可读版本
+  // 根据模式选择配色表：
+  // preview 模式：浅色 UI 用 THEME_WORD_MAPS（深色文字配色），暗色 UI 用 THEME_COLOR_MAPS
+  // style/word 模式：始终用 THEME_WORD_MAPS（白底可读配色）
   const isPreview = format === 'preview';
-  const colorMapSource = isPreview
+  const isLightMode = document.documentElement.getAttribute('data-mode') === 'light';
+  const colorMapSource = (isPreview && !isLightMode)
     ? (THEME_COLOR_MAPS[currentTheme] || THEME_COLOR_MAPS.lumen)
     : (THEME_WORD_MAPS[currentTheme] || THEME_WORD_MAPS.lumen);
 
@@ -3826,6 +4616,83 @@ function showToast(message, type = 'success') {
 document.getElementById('btnDownload').addEventListener('click', downloadDoc);
 document.getElementById('btnSample').addEventListener('click', loadSample);
 document.getElementById('btnClear').addEventListener('click', clearAll);
+document.getElementById('btnImportFile').addEventListener('click', () => document.getElementById('fileImportInput').click());
+document.getElementById('fileImportInput').addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (file) importFile(file);
+  e.target.value = '';
+});
+
+/* ---------- 拖拽导入文件 ---------- */
+
+/**
+ * 读取文件内容，自动检测语言并刷新编辑器（供文件选择和拖拽共用）
+ */
+function importFile(file) {
+  const reader = new FileReader();
+
+  reader.onerror = () => {
+    showToast('文件读取失败，请重试', 'error');
+  };
+
+  reader.onload = () => {
+    const text = reader.result;
+    if (typeof text !== 'string' || text.length === 0) {
+      showToast('文件内容为空或读取异常', 'error');
+      return;
+    }
+
+    editor.value = text;
+
+    // 使用 detectAndSetLanguageFromFilename 统一检测语言
+    detectAndSetLanguageFromFilename(file.name, text);
+
+    editor.scrollTop = 0;
+    editor.scrollLeft = 0;
+    previewWrap.scrollTop = 0;
+    previewWrap.scrollLeft = 0;
+
+    showToast(`已导入: ${file.name}`);
+  };
+
+  reader.readAsText(file, 'UTF-8');
+}
+
+// 拖拽覆盖层控制
+const dragOverlay = document.getElementById('dragOverlay');
+let dragCounter = 0;
+
+document.addEventListener('dragenter', (e) => {
+  e.preventDefault();
+  dragCounter++;
+  if (e.dataTransfer.types.includes('Files')) {
+    dragOverlay.classList.add('visible');
+  }
+});
+
+document.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+});
+
+document.addEventListener('dragleave', (e) => {
+  e.preventDefault();
+  dragCounter--;
+  if (dragCounter <= 0) {
+    dragCounter = 0;
+    dragOverlay.classList.remove('visible');
+  }
+});
+
+document.addEventListener('drop', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  dragCounter = 0;
+  dragOverlay.classList.remove('visible');
+
+  const file = e.dataTransfer.files[0];
+  if (file) importFile(file);
+});
 
 // 快捷键 Ctrl/Cmd + S 下载
 document.addEventListener('keydown', (e) => {
@@ -3845,15 +4712,15 @@ editor.focus();
 // 后台并行预加载所有语言，切换时立即可用
 preloadAllLanguages();
 
-/* ---------- 主题切换涟漪效果 ---------- */
-// 切换主题时给预览区一个短暂的高光闪动
+/* ---------- 主题切换过渡效果 ---------- */
+// 切换主题时给预览区一个轻量淡入（不使用 filter 避免重绘卡顿）
 const styleObserver = new MutationObserver(() => {
   previewCode.animate(
     [
-      { filter: 'brightness(1.4)', opacity: 0.6 },
-      { filter: 'brightness(1)', opacity: 1 }
+      { opacity: 0.85 },
+      { opacity: 1 }
     ],
-    { duration: 500, easing: 'ease-out' }
+    { duration: 200, easing: 'ease-out' }
   );
 });
 styleObserver.observe(previewCode, { attributes: true, attributeFilter: ['data-theme'] });
@@ -3884,6 +4751,58 @@ themeSwitcher.querySelectorAll('.theme-chip').forEach(chip => {
     );
   });
 });
+
+/* ---------- UI 明暗模式切换 ---------- */
+const uiModeToggle = document.getElementById('uiModeToggle');
+const modeIconSun  = uiModeToggle.querySelector('.mode-icon-sun');
+const modeIconMoon = uiModeToggle.querySelector('.mode-icon-moon');
+const modeLabel    = uiModeToggle.querySelector('.mode-label');
+
+/**
+ * 切换壳层 UI 明暗模式（仅影响外壳 UI，不影响 .preview-code[data-theme] 代码高亮）
+ * @param {'light'|'dark'} mode
+ */
+function setUIMode(mode) {
+  document.documentElement.setAttribute('data-mode', mode);
+  if (mode === 'light') {
+    modeIconSun.style.display  = 'none';
+    modeIconMoon.style.display = '';
+    modeLabel.textContent = '暗色';
+  } else {
+    modeIconSun.style.display  = '';
+    modeIconMoon.style.display = 'none';
+    modeLabel.textContent = '浅色';
+  }
+  // 预留持久化接口
+  try { localStorage.setItem('ui-mode', mode); } catch (_) {}
+  savePrefs();
+}
+
+uiModeToggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-mode') || 'dark';
+  setUIMode(current === 'dark' ? 'light' : 'dark');
+});
+
+// 初始化：读取上次持久化的偏好并恢复
+(function initPrefs() {
+  try {
+    const raw = localStorage.getItem(PREFS_KEY);
+    const prefs = raw ? JSON.parse(raw) : null;
+
+    // 恢复 UI 模式（兼容旧 key 'ui-mode'）
+    const savedUIMode = (prefs && prefs.uiMode) || localStorage.getItem('ui-mode');
+    if (savedUIMode === 'light') setUIMode('light');
+
+    // 恢复主题
+    if (prefs && prefs.currentTheme) setTheme(prefs.currentTheme);
+
+    // 恢复语言并刷新预览
+    if (prefs && prefs.currentLang) {
+      setLanguage(prefs.currentLang);
+      render();
+    }
+  } catch (_) {}
+})();
 </script>
 
 </body>
