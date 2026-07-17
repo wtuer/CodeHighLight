@@ -88,8 +88,8 @@
       radial-gradient(35% 45% at 82% 28%, rgba(167, 139, 250, 0.18), transparent 60%),
       radial-gradient(45% 55% at 70% 85%, rgba(94, 224, 208, 0.14), transparent 60%),
       radial-gradient(30% 40% at 25% 80%, rgba(244, 114, 182, 0.10), transparent 60%);
-    filter: blur(30px);
-    animation: aurora-drift 28s ease-in-out infinite alternate;
+    filter: blur(20px);
+    animation: aurora-drift 20s ease-in-out infinite alternate;
   }
 
   /* 第二层：副光斑 - 反向流动，增加深度 */
@@ -100,8 +100,8 @@
       radial-gradient(30% 35% at 65% 15%, rgba(99, 102, 241, 0.16), transparent 65%),
       radial-gradient(40% 50% at 15% 60%, rgba(45, 212, 191, 0.12), transparent 65%),
       radial-gradient(35% 40% at 90% 70%, rgba(236, 72, 153, 0.10), transparent 65%);
-    filter: blur(40px);
-    animation: aurora-drift-rev 36s ease-in-out infinite alternate;
+    filter: blur(25px);
+    animation: aurora-drift-rev 24s ease-in-out infinite alternate;
     opacity: 0.8;
   }
 
@@ -168,14 +168,15 @@
     gap: 16px;
     padding: 14px 22px;
     background: var(--glass-bg);
-    backdrop-filter: blur(48px) saturate(200%);
-    -webkit-backdrop-filter: blur(48px) saturate(200%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-glass), var(--shadow-deep);
     position: relative;
     z-index: 30;
     overflow: hidden;
+    will-change: backdrop-filter;
   }
 
   /* topbar 顶部高光线 - 缓慢流动（用 overflow 裁切在 border-radius 内） */
@@ -222,7 +223,7 @@
       from 0deg,
       #6ea8ff, #a78bfa, #5ee0d0, #f472b6, #6ea8ff
     );
-    animation: avatar-spin 4s linear infinite, avatar-float 3s ease-in-out infinite alternate;
+    animation: avatar-spin 8s linear infinite;
     filter: drop-shadow(0 0 12px rgba(110, 168, 255, 0.4)) drop-shadow(0 0 30px rgba(167, 139, 250, 0.15));
     flex-shrink: 0;
     transition: transform 0.4s var(--ease-out-expo), filter 0.4s ease;
@@ -242,7 +243,7 @@
     filter: blur(8px);
     opacity: 0.6;
     z-index: -1;
-    animation: avatar-spin 4s linear infinite;
+    animation: avatar-spin 8s linear infinite;
   }
 
   .brand-avatar {
@@ -285,7 +286,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: brand-gradient 6s linear infinite;
+    animation: brand-gradient 8s linear infinite;
     filter: drop-shadow(0 0 12px rgba(110, 168, 255, 0.5));
   }
 
@@ -312,15 +313,15 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     background-size: 300% 100%;
-    animation: brand-gradient 6s linear infinite;
+    animation: brand-gradient 8s linear infinite;
   }
 
   .brand-title::before {
-    animation: brand-gradient 6s linear infinite, brand-glitch-r 4s ease-in-out infinite;
+    animation: brand-gradient 8s linear infinite, brand-glitch-r 4s ease-in-out infinite;
   }
 
   .brand-title::after {
-    animation: brand-gradient 6s linear infinite, brand-glitch-b 4s ease-in-out infinite;
+    animation: brand-gradient 8s linear infinite, brand-glitch-b 4s ease-in-out infinite;
   }
 
   @keyframes brand-gradient {
@@ -356,8 +357,8 @@
     padding: 6px;
     width: fit-content;
     background: var(--glass-bg-strong);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: 12px;
   }
@@ -433,8 +434,8 @@
     gap: 12px;
     padding: 10px 16px;
     background: var(--glass-bg-strong);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-sm);
     color: var(--text-1);
@@ -442,7 +443,7 @@
     font-size: 13.5px;
     font-weight: 400;
     cursor: pointer;
-    transition: all 0.3s var(--ease-out-expo);
+    transition: background 0.2s ease, border-color 0.2s ease;
   }
 
   .lang-trigger:hover {
@@ -484,8 +485,8 @@
     max-height: 320px;
     overflow-y: auto;
     background: rgba(12, 12, 16, 0.88);
-    backdrop-filter: blur(48px) saturate(200%);
-    -webkit-backdrop-filter: blur(48px) saturate(200%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border-strong);
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow-deep), 0 0 40px -10px rgba(110, 168, 255, 0.06);
@@ -572,17 +573,20 @@
   /* ============ 玻璃面板（带流光动画 + 鼠标追踪光效） ============ */
   .panel {
     background: var(--glass-bg);
-    backdrop-filter: blur(48px) saturate(200%);
-    -webkit-backdrop-filter: blur(48px) saturate(200%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-glass), var(--shadow-deep);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    contain: layout style;
     position: relative;
     isolation: isolate;
-    transition: box-shadow 0.6s var(--ease-out-expo), border-color 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo);
+    will-change: transform, opacity;
+    will-change: backdrop-filter;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
 
   /* 顶部高光线 — 更细腻的彩虹渐变 */
@@ -626,7 +630,7 @@
     z-index: 3;
     opacity: 0;
     transition: opacity 0.5s var(--ease-out-expo);
-    animation: sheen-flow 6s linear infinite;
+    animation: sheen-flow 12s linear infinite;
   }
 
   .panel:hover::after {
@@ -640,7 +644,6 @@
       var(--shadow-deep),
       0 0 80px -15px rgba(110, 168, 255, 0.12),
       0 0 120px -30px rgba(167, 139, 250, 0.06);
-    transform: translateY(-1px);
   }
 
   /* 鼠标追踪光效层 — JS 动态更新 --mx, --my */
@@ -653,6 +656,7 @@
     pointer-events: none;
     z-index: 1;
     opacity: 0;
+    will-change: opacity;
     transition: opacity 0.4s ease;
     background: radial-gradient(
       350px circle at var(--mx, 50%) var(--my, 50%),
@@ -713,9 +717,9 @@
   .panel-dots span:nth-child(2) { background: rgba(254, 188, 46, 0.55); box-shadow: 0 0 6px rgba(254, 188, 46, 0.25); }
   .panel-dots span:nth-child(3) { background: rgba(40, 200, 64, 0.55); box-shadow: 0 0 6px rgba(40, 200, 64, 0.25); }
 
-  .panel-header:hover .panel-dots span:nth-child(1) { box-shadow: 0 0 10px rgba(255, 95, 87, 0.45); }
-  .panel-header:hover .panel-dots span:nth-child(2) { box-shadow: 0 0 10px rgba(254, 188, 46, 0.45); }
-  .panel-header:hover .panel-dots span:nth-child(3) { box-shadow: 0 0 10px rgba(40, 200, 64, 0.45); }
+  .panel-header:hover .panel-dots span:nth-child(1) { box-shadow: 0 0 8px rgba(255, 95, 87, 0.45); }
+  .panel-header:hover .panel-dots span:nth-child(2) { box-shadow: 0 0 8px rgba(254, 188, 46, 0.45); }
+  .panel-header:hover .panel-dots span:nth-child(3) { box-shadow: 0 0 8px rgba(40, 200, 64, 0.45); }
 
   .panel-meta {
     font-family: 'JetBrains Mono', monospace;
@@ -803,7 +807,7 @@
     caret-color: var(--accent);
     tab-size: 2;
     overflow: auto;
-    transition: background 0.3s ease;
+    transition: none;
   }
 
   .editor-input:focus {
@@ -843,7 +847,6 @@
     border-radius: 4px;
     border: 2px solid transparent;
     background-clip: content-box;
-    transition: background 0.3s ease;
   }
   .editor-input::-webkit-scrollbar-thumb:hover,
   .preview-wrap::-webkit-scrollbar-thumb:hover {
@@ -2090,14 +2093,15 @@
     gap: 16px;
     padding: 14px 18px;
     background: var(--glass-bg);
-    backdrop-filter: blur(48px) saturate(200%);
-    -webkit-backdrop-filter: blur(48px) saturate(200%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-glass), var(--shadow-deep);
     position: relative;
     z-index: 20;
     overflow: hidden;
+    will-change: backdrop-filter;
   }
 
   .action-group {
@@ -2112,8 +2116,8 @@
     gap: 8px;
     padding: 10px 16px;
     background: var(--glass-bg-strong);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: 11px;
     color: var(--text-1);
@@ -2121,7 +2125,7 @@
     font-size: 13px;
     font-weight: 400;
     cursor: pointer;
-    transition: all 0.35s var(--ease-out-expo);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     position: relative;
     overflow: hidden;
   }
@@ -2229,8 +2233,8 @@
     gap: 10px;
     padding: 12px 20px;
     background: rgba(12, 12, 16, 0.94);
-    backdrop-filter: blur(48px) saturate(200%);
-    -webkit-backdrop-filter: blur(48px) saturate(200%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 14px;
     box-shadow: var(--shadow-deep), 0 0 40px -10px rgba(110, 168, 255, 0.08);
@@ -2300,7 +2304,7 @@
 
   /* 加载动画 */
   @keyframes fade-up {
-    from { opacity: 0; transform: translateY(16px) scale(0.98); filter: blur(4px); }
+    from { opacity: 0; transform: translateY(16px) scale(0.98); filter: blur(2px); }
     to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
   }
 
@@ -2323,8 +2327,8 @@
     --bg-1: #ebebef;
     --bg-2: #e0e1e6;
 
-    --glass-bg: rgba(255, 255, 255, 0.62);
-    --glass-bg-strong: rgba(255, 255, 255, 0.78);
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-bg-strong: rgba(255, 255, 255, 0.96);
     --glass-border: rgba(0, 0, 0, 0.08);
     --glass-border-strong: rgba(0, 0, 0, 0.14);
     --glass-highlight: rgba(255, 255, 255, 0.85);
@@ -2364,6 +2368,32 @@
     opacity: 0.7;
   }
 
+  /* 浅色模式下关闭所有玻璃模糊，防止暗色背景透出 */
+  html[data-mode="light"] .topbar,
+  body[data-mode="light"] .topbar,
+  html[data-mode="light"] .panel,
+  body[data-mode="light"] .panel,
+  html[data-mode="light"] .actionbar,
+  body[data-mode="light"] .actionbar,
+  html[data-mode="light"] .theme-switcher,
+  body[data-mode="light"] .theme-switcher,
+  html[data-mode="light"] .lang-trigger,
+  body[data-mode="light"] .lang-trigger,
+  html[data-mode="light"] .lang-menu,
+  body[data-mode="light"] .lang-menu,
+  html[data-mode="light"] .btn,
+  body[data-mode="light"] .btn {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* 浅色模式下主题切换器 */
+  html[data-mode="light"] .theme-switcher,
+  body[data-mode="light"] .theme-switcher {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
   /* 浅色模式下 topbar 顶部高光线调整 */
   html[data-mode="light"] .topbar::before,
   body[data-mode="light"] .topbar::before {
@@ -2375,8 +2405,6 @@
       transparent 100%
     );
   }
-
-  /* 浅色模式下硬编码的白色悬浮色改为暗色 */
   html[data-mode="light"] .theme-chip:hover,
   body[data-mode="light"] .theme-chip:hover {
     background: rgba(0, 0, 0, 0.06);
@@ -2384,6 +2412,23 @@
   html[data-mode="light"] .theme-chip.active,
   body[data-mode="light"] .theme-chip.active {
     background: rgba(0, 0, 0, 0.07);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 8px -2px rgba(0, 0, 0, 0.1);
+  }
+  html[data-mode="light"] .theme-chip .swatch,
+  body[data-mode="light"] .theme-chip .swatch {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.15);
+  }
+  html[data-mode="light"] .theme-chip.active .swatch,
+  body[data-mode="light"] .theme-chip.active .swatch {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 2px 6px rgba(0, 0, 0, 0.18), 0 0 8px rgba(0, 0, 0, 0.06);
+  }
+  html[data-mode="light"] .theme-chip,
+  body[data-mode="light"] .theme-chip {
+    color: var(--text-3);
+  }
+  html[data-mode="light"] .theme-chip:hover,
+  body[data-mode="light"] .theme-chip:hover {
+    color: var(--text-1);
   }
   html[data-mode="light"] .lang-trigger:hover,
   body[data-mode="light"] .lang-trigger:hover {
@@ -2405,12 +2450,34 @@
   /* 浅色模式下语言下拉菜单 */
   html[data-mode="light"] .lang-menu,
   body[data-mode="light"] .lang-menu {
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.96);
     border-color: var(--glass-border-strong);
+    color: var(--text-1);
   }
   html[data-mode="light"] .lang-menu::-webkit-scrollbar-thumb,
   body[data-mode="light"] .lang-menu::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.12);
+  }
+
+  /* 浅色模式下 Toast */
+  html[data-mode="light"] .toast,
+  body[data-mode="light"] .toast {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.12), 0 2px 6px -2px rgba(0, 0, 0, 0.06);
+    color: var(--text-1);
+  }
+  html[data-mode="light"] .toast .toast-icon,
+  body[data-mode="light"] .toast .toast-icon {
+    background: rgba(22, 163, 74, 0.12);
+    color: #16a34a;
+    box-shadow: 0 0 10px rgba(22, 163, 74, 0.1);
+  }
+  html[data-mode="light"] .toast.error .toast-icon,
+  body[data-mode="light"] .toast.error .toast-icon {
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.1);
   }
 
   /* 浅色模式下 preview 背景由各浅色主题变体控制 */
@@ -3084,7 +3151,7 @@ fn main() {
   position: relative;
   padding: 24px;
   background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
   box-shadow:
@@ -3918,9 +3985,13 @@ function render() {
 
   // 行号
   const lineCount = code ? code.split('\n').length : 1;
-  const lines = Array.from({ length: lineCount }, (_, i) => `<div>${i + 1}</div>`).join('');
-  editorGutter.innerHTML = lines;
-  previewGutter.innerHTML = lines;
+  // 只在行数变化时更新行号 DOM
+  if (editorGutter._lineCount !== lineCount) {
+    const lines = Array.from({ length: lineCount }, (_, i) => `<div>${i + 1}</div>`).join('');
+    editorGutter.innerHTML = lines;
+    previewGutter.innerHTML = lines;
+    editorGutter._lineCount = lineCount;
+  }
 
   // 高亮
   if (currentLang === 'plaintext' || code.trim() === '') {
@@ -3941,16 +4012,23 @@ function render() {
   }
 
   // 统计
-  statLines.textContent = lineCount;
-  statChars.textContent = code.length;
-  if (loadingLangs.has(currentLang)) {
-    editorMeta.textContent = `加载 ${currentLang} 中...`;
-  } else {
-    editorMeta.textContent = code.length === 0 ? '就绪' : `已编辑 · ${lineCount} 行`;
-  }
+  if (statLines.textContent != lineCount) statLines.textContent = lineCount;
+  if (statChars.textContent != code.length) statChars.textContent = code.length;
+  const metaText = loadingLangs.has(currentLang)
+    ? `加载 ${currentLang} 中...`
+    : code.length === 0 ? '就绪' : `已编辑 · ${lineCount} 行`;
+  if (editorMeta.textContent !== metaText) editorMeta.textContent = metaText;
 }
 
-editor.addEventListener('input', render);
+/* ---------- 输入防抖渲染 ---------- */
+let renderRafId = null;
+editor.addEventListener('input', () => {
+  if (renderRafId) cancelAnimationFrame(renderRafId);
+  renderRafId = requestAnimationFrame(() => {
+    render();
+    renderRafId = null;
+  });
+});
 
 /* ---------- 左右联动滚动 ---------- */
 let syncingScroll = false;
@@ -4712,29 +4790,40 @@ editor.focus();
 // 后台并行预加载所有语言，切换时立即可用
 preloadAllLanguages();
 
-/* ---------- 主题切换过渡效果 ---------- */
-// 切换主题时给预览区一个轻量淡入（不使用 filter 避免重绘卡顿）
+/* ---------- 主题切换过渡效果（CSS 类控制） ---------- */
 const styleObserver = new MutationObserver(() => {
-  previewCode.animate(
-    [
-      { opacity: 0.85 },
-      { opacity: 1 }
-    ],
-    { duration: 200, easing: 'ease-out' }
-  );
+  previewCode.style.transition = 'none';
+  previewCode.style.opacity = '0.9';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      previewCode.style.transition = 'opacity 0.15s ease-out';
+      previewCode.style.opacity = '1';
+    });
+  });
 });
 styleObserver.observe(previewCode, { attributes: true, attributeFilter: ['data-theme'] });
 
-/* ---------- 鼠标追踪光效 ---------- */
+/* ---------- 鼠标追踪光效（rAF 节流） ---------- */
 document.querySelectorAll('.panel, .topbar, .actionbar').forEach(el => {
   const spotlight = el.querySelector('.spotlight');
   if (!spotlight) return;
+  let rafId = null;
   el.addEventListener('mousemove', (e) => {
-    const rect = el.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    el.style.setProperty('--mx', x + '%');
-    el.style.setProperty('--my', y + '%');
+    if (rafId) return;
+    rafId = requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      el.style.setProperty('--mx', x + '%');
+      el.style.setProperty('--my', y + '%');
+      rafId = null;
+    });
+  });
+  el.addEventListener('mouseleave', () => {
+    spotlight.style.opacity = '0';
+  });
+  el.addEventListener('mouseenter', () => {
+    spotlight.style.opacity = '';
   });
 });
 
